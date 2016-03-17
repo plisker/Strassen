@@ -23,25 +23,35 @@
 // }
 
 
+// Allocates memory for a square matrix of size N x N using double pointers...
+#warning Will still need to free at some point…
+int** allocateMatrix(int N) {
+    int** matrix;
+    matrix = (int**) malloc(N*sizeof(int*));
+    for (int i = 0; i < N; i++)
+        matrix[i] = (int*) malloc(N*sizeof(int));
+    return matrix;
+}
+
 //STANDARD ALGORITHM
 // standard matrix multiplication
-void standard_mult(int d, int a[][10], int b[][10], int c[][10]){
+void standard_mult(int d, int** a, int** b, int** answer){
 	// int** c = m_malloc(dim);
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
-			c[i][j] = 0;
+			answer[i][j] = 0;
 			for (int k=0; k<d; k++){
-				c[i][j] += a[i][k]*b[k][j];
+				answer[i][j] += a[i][k]*b[k][j];
 			}
 		}
 	}
 }
 
 //prints the matrix
-void display_mat(int d, int c[][10]){
+void display_mat(int d, int** matrix){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
-			printf("%d\t ",c[i][j]);
+			printf("%d\t ",matrix[i][j]);
 			if(j==d-1){
 				printf("\n");
 			}
@@ -51,50 +61,64 @@ void display_mat(int d, int c[][10]){
 
 //STRASSEN ALGORITHM
 // matrix addition
-void matrix_add(int d, int a[][10], int b[][10], int c[][10]){
+void matrix_add(int d, int** a, int** b, int** answer){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
-			c[i][j] = a[i][j]+b[i][j];
+			answer[i][j] = a[i][j]+b[i][j];
 		}
 	}
 }
 
 //matrix subtraction
-void matrix_subtract(int d, int a[][10], int b[][10], int c[][10]){
+void matrix_subtract(int d, int** a, int** b, int** answer){
+
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
-			c[i][j] = a[i][j]-b[i][j];
+			answer[i][j] = a[i][j]-b[i][j];
 		}
 	}
 }
 
 //main function that lets user test
 int main(void){
-	int a[10][10],b[10][10],c[10][10], e[10][10], f[10][10], d;
-	printf("Size of matrix is %d\n", (int) sizeof(a));
+	int d;
+	//What was tis supposed to be?
+	//printf("Size of matrix is %d\n", (int) sizeof(a));
 	printf("Enter the dimension of square matrices to be multiplied:\n");
 	scanf("%d",&d);
 	// int** m1 = m_malloc(d);
 	// int** m2 = m_malloc(d);
+	int** a = allocateMatrix(d);
+
 	printf("Enter the values of the first matrix:\n");
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
-			scanf("%d", &a[i][j]);
+			scanf("%d", a[i][j]);
 		}
 	}
+
+	int** b = allocateMatrix(d);
+
 	printf("Enter the values of the second matrix:\n");
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
-			scanf("%d", &b[i][j]);
+			scanf("%d", b[i][j]);
 		}
 	}
+
+	int** c = allocateMatrix(d);
+
 	standard_mult(d,a,b,c);
 	printf("The product of the two matrices is:\n");
 	display_mat(d,c);
 
+	int** e = allocateMatrix(d);
+
 	matrix_add(d,a,b,e);
 	printf("The sum of the two matrices is:\n");
 	display_mat(d,e);
+
+	int** f = allocateMatrix(d);
 
 	matrix_subtract(d,a,b,f);
 	printf("The difference of the two matrices is:\n");
