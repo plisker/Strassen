@@ -22,6 +22,8 @@
 // 	return;
 // }
 
+
+//STANDARD ALGORITHM
 // standard matrix multiplication
 void standard_mult(int d, int a[][10], int b[][10], int c[][10]){
 	// int** c = m_malloc(dim);
@@ -47,9 +49,29 @@ void display_mat(int d, int c[][10]){
 	}
 }
 
+//STRASSEN ALGORITHM
+// matrix addition
+void matrix_add(int d, int a[][10], int b[][10], int c[][10]){
+	for (int i=0; i<d; i++){
+		for (int j=0; j<d; j++){
+			c[i][j] = a[i][j]+b[i][j];
+		}
+	}
+}
+
+//matrix subtraction
+void matrix_subtract(int d, int a[][10], int b[][10], int c[][10]){
+	for (int i=0; i<d; i++){
+		for (int j=0; j<d; j++){
+			c[i][j] = a[i][j]-b[i][j];
+		}
+	}
+}
+
 //main function that lets user test
 int main(void){
-	int a[10][10],b[10][10],c[10][10], d;
+	int a[10][10],b[10][10],c[10][10], e[10][10], f[10][10], d;
+	printf("Size of matrix is %d\n", (int) sizeof(a));
 	printf("Enter the dimension of square matrices to be multiplied:\n");
 	scanf("%d",&d);
 	// int** m1 = m_malloc(d);
@@ -67,14 +89,16 @@ int main(void){
 		}
 	}
 	standard_mult(d,a,b,c);
-	printf("The resulting matrix is:\n");
-	// for (int i=0; i<d; i++){
-	// 	printf("\n");
-	// 	for (int j=0; j<d; j++){
-	// 		printf("%d\t", c[i][j]);
-	// 	}
-	// }
+	printf("The product of the two matrices is:\n");
 	display_mat(d,c);
+
+	matrix_add(d,a,b,e);
+	printf("The sum of the two matrices is:\n");
+	display_mat(d,e);
+
+	matrix_subtract(d,a,b,f);
+	printf("The difference of the two matrices is:\n");
+	display_mat(d,f);
 	// m_free(m1,d);
 	// m_free(m2,d);
 	return 0;
