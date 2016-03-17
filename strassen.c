@@ -24,13 +24,20 @@
 
 
 // Allocates memory for a square matrix of size N x N using double pointers...
-#warning Will still need to free at some point…
+//warning Will still need to free at some point…
 int** allocateMatrix(int N) {
     int** matrix;
     matrix = (int**) malloc(N*sizeof(int*));
     for (int i = 0; i < N; i++)
         matrix[i] = (int*) malloc(N*sizeof(int));
     return matrix;
+}
+
+void freeMatrix(int** m, int N){
+	for (int i = 0; i < N; i++)
+		free(m[i]);
+	free m;
+	return;
 }
 
 //STANDARD ALGORITHM
