@@ -36,7 +36,7 @@ int** allocateMatrix(int N) {
 void freeMatrix(int** m, int N){
 	for (int i = 0; i < N; i++)
 		free(m[i]);
-	free m;
+	free(m);
 	return;
 }
 
@@ -132,5 +132,11 @@ int main(void){
 	display_mat(d,f);
 	// m_free(m1,d);
 	// m_free(m2,d);
+	freeMatrix(a,d);
+	freeMatrix(b,d);
+	freeMatrix(c,d);
+	freeMatrix(e,d);
+	freeMatrix(f,d);
+	printf("Everything has been freed!");
 	return 0;
 }
