@@ -93,7 +93,7 @@ int main(void){
 	printf("Enter the values of the first matrix:\n");
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
-			scanf("%d", a[i][j]);
+			scanf("%d", &a[i][j]);
 		}
 	}
 
@@ -102,7 +102,7 @@ int main(void){
 	printf("Enter the values of the second matrix:\n");
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
-			scanf("%d", b[i][j]);
+			scanf("%d", &b[i][j]);
 		}
 	}
 
