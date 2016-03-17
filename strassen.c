@@ -23,8 +23,8 @@ void m_free(int[][] m, int dim){
 }
 
 // standard matrix multiplication
-int[][] mat_mult(int[][] a, int[][] b, dim){
-	int[dim][dim] c;
+int[][] standard_mult(int[][] a, int[][] b, dim){
+	c = m_malloc(dim);
 	for (int i=0; i<dim; i++){
 		for (int j=0; j<dim; j++){
 			c[i][j] = 0;
@@ -35,3 +35,33 @@ int[][] mat_mult(int[][] a, int[][] b, dim){
 	}
 }
 
+int main(){
+	int d;
+	printf("Enter the dimension of square matrices to be multiplied:\n");
+	scanf("%d",&d);
+	m1 = m_malloc(d);
+	m2 = m_malloc(d);
+	printf("Enter the values of the first matrix:\n");
+	for (int i=0; i<d; i++){
+		for (int j=0; j<d; j++){
+			scanf("%d", &m1[i][j]);
+		}
+	}
+	printf("Enter the values of the second matrix:\n");
+	for (int i=0; i<d; i++){
+		for (int j=0; j<d; j++){
+			scanf("%d", &m2[i][j]);
+		}
+	}
+	m3 = standard_mult(m1,m2,d);
+	printf("The resulting matrix is:\n");
+	for (int i=0; i<d; i++){
+		printf("\n");
+		for (int j=0; j<d; j++){
+			printf("%d\t", m3[i][j]);
+		}
+	}
+	m_free(m1,d);
+	m_free(m2,d);
+	return 0
+}
