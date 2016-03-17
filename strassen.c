@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+//allocates & initializes a matrix of size dim
 int[][] m_malloc(dim){
 	int[][] m = (int[][]) malloc(dim * sizeof(int*));
 	for (int i=0;i<dim;i++){
@@ -12,11 +13,16 @@ int[][] m_malloc(dim){
 	return m;
 }
 
+//frees said matrix of size dim
 void m_free(int[][] m, int dim){
 	for (int i=0; i<dim; i++){
 		free(m[i]);
 	}
 	free m;
+	return;
+}
+
+int main(){
 	return;
 }
 
