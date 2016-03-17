@@ -4,16 +4,16 @@
 #include <stdlib.h>
 #include <math.h>
 
-//allocates & initializes a matrix of size dim
+// allocates & initializes a matrix of size dim
 int[][] m_malloc(dim){
 	int[][] m = (int[][]) malloc(dim * sizeof(int*));
-	for (int i=0;i<dim;i++){
+	for (int i=0; i<dim; i++){
 		m[i]=(int*) malloc(dim * sizeof(int));
 	}
 	return m;
 }
 
-//frees said matrix of size dim
+// frees said matrix of size dim
 void m_free(int[][] m, int dim){
 	for (int i=0; i<dim; i++){
 		free(m[i]);
@@ -22,7 +22,16 @@ void m_free(int[][] m, int dim){
 	return;
 }
 
-int main(){
-	return;
+// standard matrix multiplication
+int[][] mat_mult(int[][] a, int[][] b, dim){
+	int[dim][dim] c;
+	for (int i=0; i<dim; i++){
+		for (int j=0; j<dim; j++){
+			c[i][j] = 0;
+			for (int k=0; k<dim; k++){
+				c[i][j] += c[i][k]*c[k][j];
+			}
+		}
+	}
 }
 
