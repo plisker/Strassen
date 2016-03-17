@@ -35,6 +35,7 @@ void standard_mult(int d, int a[][10], int b[][10], int c[][10]){
 	}
 }
 
+//prints the matrix
 void display_mat(int d, int c[][10]){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
@@ -46,6 +47,7 @@ void display_mat(int d, int c[][10]){
 	}
 }
 
+//main function that lets user test
 int main(void){
 	int a[10][10],b[10][10],c[10][10], d;
 	printf("Enter the dimension of square matrices to be multiplied:\n");
