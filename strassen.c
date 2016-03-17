@@ -39,9 +39,9 @@ void standard_mult(int d, int a[][10], int b[][10], int c[][10]){
 void display_mat(int d, int c[][10]){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
-			printf("%d ",c[i][j]);
+			printf("%d\t ",c[i][j]);
 			if(j==d-1){
-				printf("\n\n");
+				printf("\n");
 			}
 		}
 	}
