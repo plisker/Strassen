@@ -73,6 +73,8 @@ void matrix_add(int d, int** a, int** b, int** answer){
 }
 
 //strassen add, tracking indexes
+// RS = row start
+// CS = column start
 void s_matrix_subtract(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, int b_CS, int** answer, int c_RS, int c_CS){
 
 	for (int i=0; i<d; i++){
@@ -190,13 +192,13 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 
 		// AE + BG ... top left
 		s_matrix_add(new_d, five, four, 0, 0, 0, 0, answer, 0+new_d, 0);
-		s_matrix_add(new_d, two, six, 0, 0, 0, 0, answer, 0+new_d, 0+new_d);
-		s_matrix_subtract(new_d, answer, answer, 0+new_d, 0, 0+new_d, 0+new_d, answer, 0, 0);
+		s_matrix_subtract(new_d, answer, two, 0+new_d, 0, 0, 0, answer, 0+new_d, 0+new_d);
+		s_matrix_add(new_d, answer, six, 0+new_d, 0+new_d, 0, 0, answer, 0, 0);
 
 		// CF + DH ... bottom right
 		s_matrix_add(new_d, five, one, 0, 0, 0, 0, answer, 0+new_d, 0);
-		s_matrix_subtract(new_d, three, seven, 0, 0, 0, 0, answer, 0, 0+new_d);
-		s_matrix_subtract(new_d, answer, answer, 0+new_d, 0, 0, 0+new_d, answer, 0+new_d, 0+new_d);
+		s_matrix_subtract(new_d, answer, three, 0+new_d, 0, 0, 0, answer, 0, 0+new_d);
+		s_matrix_subtract(new_d, answer, seven, 0, 0+new_d, 0, 0, answer, 0+new_d, 0+new_d);
 
 		// AF + BH ... top right
 		s_matrix_add(new_d, one, two, 0, 0, 0, 0, answer, 0, 0+new_d);
