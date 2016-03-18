@@ -267,6 +267,6 @@ int main(void){
 	freeMatrix(c,d);
 	freeMatrix(e,d);
 	freeMatrix(f,d);
-	printf("Everything has been freed!\n");
+	printf("Everything has now been freed!\n");
 	return 0;
 }
