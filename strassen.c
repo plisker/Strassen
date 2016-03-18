@@ -7,7 +7,6 @@
 void strassen(int, int**, int**, int, int, int, int, int**);
 
 // Allocates memory for a square matrix of size d x d using double pointers...
-#warning Will still need to free at some point…
 int** allocateMatrix(int d) {
     int** matrix;
     matrix = (int**) malloc(d*sizeof(int*)); //allocate space for d rows of ints
@@ -144,7 +143,6 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		// P_2
 		strassen(new_d, sub_b, matrix2, 0, 0, b_RS+new_d, b_CS+new_d, two);
 
-
 		// C + D
 		s_matrix_add(new_d, matrix1, matrix1, a_RS+new_d, a_CS, a_RS+new_d, a_CS+new_d, sub_a, 0,0);
 		
@@ -175,7 +173,6 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		// P_6
 		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, six);
 
-
 		// A - C
 		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS, sub_a, 0, 0);
 		
@@ -185,7 +182,8 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		// P_7
 		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, seven);
 
-		#warning Free sub_a and sub_b here
+		freeMatrix(sub_a, new_d);
+		freeMatrix(sub_b, new_d);
 
 		//Calculating the four sub matrices
 
@@ -204,6 +202,14 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		
 		// CE + DG ... bottom left
 		s_matrix_add(new_d, three, four, 0, 0, 0, 0, answer, 0+new_d, 0);
+
+		freeMatrix(one, new_d);
+		freeMatrix(two, new_d);
+		freeMatrix(three, new_d);
+		freeMatrix(four, new_d);
+		freeMatrix(five, new_d);
+		freeMatrix(six, new_d);
+		freeMatrix(seven, new_d);
 
 		/*
 		*** Code for debugging. Can delete later! ***
@@ -290,18 +296,9 @@ int main(void){
 	//Subtraction of Standard and Strassen... to check if they're the same
 	int** f = allocateMatrix(d);
 	matrix_subtract(d,c,s_c,f);
-	printf("The difference of the two matrices is:\n");
+	printf("The difference of the two matrices should be all 0s:\n");
 	display_mat(d,f);
 
-	//Free everything
-	freeMatrix(a,d);
-	freeMatrix(b,d);
-	freeMatrix(c,d);
-	//freeMatrix(e,d);
-	freeMatrix(f,d);
-
-	#warning Do we actually need to free things if it's the last thing in the program?
-	// Sure, good practice, but wastes time though since they'll be freed when code terminates
-	printf("Everything (?) has now been freed!\n");
+	#warning Do we need to free things here at the end?
 	return 0;
 }
