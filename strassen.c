@@ -13,13 +13,16 @@ int** allocateMatrix(int d) {
     matrix = (int**) malloc(d*sizeof(int*)); //allocate space for d rows of ints
     for (int i = 0; i < d; i++){
         matrix[i] = (int*) malloc(d*sizeof(int)); //allocate enough space for d columns of ints
+        
+        #warning This is probaby inefficient, especially since the function is used for malloc'ing several different matrices
         for (int j=0;j<d;j++){
     		matrix[i][j]=0; //solves padding 0 problem for non-powers of 2
     	}
     }
     return matrix;
 }
-// Frees said square matrix
+
+// Frees square matrix of size d x d
 void freeMatrix(int** m, int d){
 	for (int i = 0; i < d; i++)
 		free(m[i]);
@@ -34,7 +37,7 @@ int isPowerofTwo(int n){
 	return (n==1);
 }
 
-// Looks for next power of two (greater than or equal to d)
+// Returns next power of two (greater than or equal to d)
 int nextPowofTwo(int d){
 	double n = ceil(log2(((double) d)));
 	int x = (int) pow((double) 2, n);
