@@ -107,8 +107,6 @@ void matrix_subtract(int d, int** a, int** b, int** answer){
 	}
 }
 
-#warning Only works for powers of 2
-
 // Still not sure whether this -- and other functions -- should be void, or should be returning an int** double pointer to matrix
 // I think returning pointers could make code more legible and clearner, but in any case, it works as is, so it's of low priority
 void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS, int b_CS, int** answer){
@@ -301,6 +299,6 @@ int main(void){
 
 	#warning Do we actually need to free things if it's the last thing in the program?
 	// Sure, good practice, but wastes time though since they'll be freed when code terminates
-	printf("Everything has now been freed!\n");
+	printf("Everything (?) has now been freed!\n");
 	return 0;
 }
