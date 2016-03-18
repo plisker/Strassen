@@ -7,7 +7,7 @@
 void strassen(int, int**, int**, int, int, int, int, int**);
 
 // Allocates memory for a square matrix of size N x N using double pointers...
-//warning Will still need to free at some point…
+#warning Will still need to free at some point…
 int** allocateMatrix(int N) {
     int** matrix;
     matrix = (int**) malloc(N*sizeof(int*));
@@ -23,8 +23,7 @@ void freeMatrix(int** m, int N){
 	return;
 }
 
-//STANDARD ALGORITHM
-// standard matrix multiplication
+// Standard matrix multiplication
 void standard_mult(int d, int** a, int** b, int** answer){
 	// int** c = m_malloc(dim);
 	for (int i=0; i<d; i++){
@@ -37,7 +36,7 @@ void standard_mult(int d, int** a, int** b, int** answer){
 	}
 }
 
-//prints the matrix
+// Prints the matrix
 void display_mat(int d, int** matrix){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
@@ -49,10 +48,9 @@ void display_mat(int d, int** matrix){
 	}
 }
 
-//STRASSEN ALGORITHM
 // matrix addition
 
-// strassen add, tracking indexes
+// Strassen add, tracking indexes
 // RS = row start
 // CS = column start
 void s_matrix_add(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, int b_CS, int** answer, int c_RS, int c_CS){
@@ -63,7 +61,7 @@ void s_matrix_add(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, int b_C
 	}
 }
 
-//full add, no matrices tracked
+// Full add, no matrices tracked
 void matrix_add(int d, int** a, int** b, int** answer){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
@@ -72,7 +70,7 @@ void matrix_add(int d, int** a, int** b, int** answer){
 	}
 }
 
-//strassen add, tracking indexes
+// Strassen subtract, tracking indexes
 // RS = row start
 // CS = column start
 void s_matrix_subtract(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, int b_CS, int** answer, int c_RS, int c_CS){
@@ -84,7 +82,7 @@ void s_matrix_subtract(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, in
 	}
 }
 
-//matrix subtraction
+// Full subtract, no matrices tracked
 void matrix_subtract(int d, int** a, int** b, int** answer){
 
 	for (int i=0; i<d; i++){
@@ -133,7 +131,7 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 
 		// C + D
 		int** sub_3 = allocateMatrix(new_d);
-		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS+new_d, a_RS+new_d, a_CS+new_d, sub_3, 0, 0);
+		s_matrix_add(new_d, matrix1, matrix1, a_RS+new_d, a_CS, a_RS+new_d, a_CS+new_d, sub_3, 0,0);
 		
 		// P_3
 		strassen(new_d, sub_3, matrix2, 0, 0, b_RS, b_CS, three);
@@ -206,14 +204,38 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		// CE + DG ... bottom left
 		s_matrix_add(new_d, three, four, 0, 0, 0, 0, answer, 0+new_d, 0);
 
+		/*
+
+		Code for debugging. Can delete later!
+
+		printf("One:\n");
+		display_mat(new_d, one);
+
+		printf("Two:\n");
+		display_mat(new_d, two);
+
+		printf("Three:\n");
+		display_mat(new_d, three);
+
+		printf("Four:\n");
+		display_mat(new_d, four);
+
+		printf("Five:\n");
+		display_mat(new_d, five);
+
+		printf("Six:\n");
+		display_mat(new_d, six);
+
+		printf("Seven:\n");
+		display_mat(new_d, seven);
+		*/
+
 	}
 }
 
 //main function that lets user test
 int main(void){
 	int d;
-	//What was tis supposed to be?
-	//printf("Size of matrix is %d\n", (int) sizeof(a));
 	printf("Enter the dimension of square matrices to be multiplied:\n");
 	scanf("%i",&d);
 	#warning Make compatible with non-power of 2
