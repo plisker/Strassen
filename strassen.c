@@ -19,6 +19,11 @@ int** allocateMatrix(int d) {
     matrix = (int**) malloc(d*sizeof(int*));
     for (int i = 0; i < d; i++)
         matrix[i] = (int*) malloc(d*sizeof(int));
+    for (int i=0;i<d;i++){
+    	for (int j=0;j<d;j++){
+    		matrix[i][j]=0;
+    	}
+    }
     return matrix;
 }
 
@@ -35,10 +40,14 @@ int nextPowofTwo(int d){
 	return x;
 }
 
-void padMatrix(int** m, int d){
-	n = nextPowofTwo(d);
-	
-}
+// void padMatrix(int** m, int d){
+// 	n = nextPowofTwo(d);
+// 	for (int i=0;i<d;i++){
+// 		for (int j=d;j<n;j++){
+// 			m[i][j]=0;
+// 		}
+// 	}
+// }
 
 // Standard matrix multiplication
 void standard_mult(int d, int** a, int** b, int** answer){
@@ -61,6 +70,11 @@ void display_mat(int d, int** matrix){
 				printf("\n");
 			}
 		}
+	}
+}
+void print_mat(int d, int** matrix){
+	for (int i=0; i<d; i++){
+		printf("%d\n", matrix[i][d]);
 	}
 }
 
@@ -253,27 +267,45 @@ int main(void){
 	int d;
 	printf("Enter the dimension of square matrices to be multiplied:\n");
 	scanf("%i",&d);
-	if (isPowerofTwo(d)==1)
+	int** a; //first input matrix
+	int** b; //second input matrix
+	int** c; //standard result matrix
+	int** s_c; //strassen result matrix
+	int x = nextPowofTwo(d); //2^ceil(log_2(d))
+
+	//Check if input integer is a power of 2
+	if(isPowerofTwo(d)==1){
+		//Allocate memory to fit size d matrix
 		printf("This is a power of two\n");
+		a = allocateMatrix(d);
+		b = allocateMatrix(d);
+		s_c = allocateMatrix(d);
+	}
 	else{
+		//Allocate memory to fit size x matrix
 		printf("This is not a power of two\n");
-		int x = nextPowofTwo(d);
 		printf("Next power of two is %d\n",x);
+		a = allocateMatrix(x);
+		b = allocateMatrix(x);
+		s_c = allocateMatrix(x);
 	}
 
 	#warning Make compatible with non-power of 2
 	printf("If that wasn't a power of 2, this will probably break. Whoops.\n");
 	
-	int** a = allocateMatrix(d);
-
+	//int** a = allocateMatrix(d);
 	printf("Enter the values of the first matrix:\n");
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
 			scanf("%d", &a[i][j]);
 		}
 	}
+	printf("Your first input matrix is:\n");
+	display_mat(d, a);
+	//Check non-powers of 2
+	//display_mat(x, a);
 
-	int** b = allocateMatrix(d);
+	//int** b = allocateMatrix(d);
 
 	printf("Enter the values of the second matrix:\n");
 	for (int i=0; i<d; i++){
@@ -281,30 +313,36 @@ int main(void){
 			scanf("%d", &b[i][j]);
 		}
 	}
+	printf("Your second input matrix is:\n");
+	display_mat(d, b);
+	//Check non-powers of 2
+	//display_mat(x, b);
 
-	int** c = allocateMatrix(d);
+	c = allocateMatrix(d);
 
+	//Standard multiplication
 	standard_mult(d,a,b,c);
 	printf("The standard product of the two matrices is:\n");
 	display_mat(d,c);
 
-	int** s_c = allocateMatrix(d);
-	strassen(d, a, b, 0, 0, 0, 0, s_c);
+	//Strassen multiplication
+	strassen(x, a, b, 0, 0, 0, 0, s_c);	
 	printf("The strassen product of the two matrices is:\n");
 	display_mat(d,s_c);
 
-
+	//Addition
 	int** e = allocateMatrix(d);
-
 	matrix_add(d,a,b,e);
 	printf("The sum of the two matrices is:\n");
 	display_mat(d,e);
 
+	//Subtraction
 	int** f = allocateMatrix(d);
-
 	matrix_subtract(d,a,b,f);
 	printf("The difference of the two matrices is:\n");
 	display_mat(d,f);
+
+	//Free everything
 	freeMatrix(a,d);
 	freeMatrix(b,d);
 	freeMatrix(c,d);
