@@ -130,79 +130,61 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		int** seven = allocateMatrix(new_d);
 
 		// F - H
-		int** sub_1 = allocateMatrix(new_d);
-		s_matrix_subtract(new_d, matrix2, matrix2, b_RS, b_CS+new_d, b_RS+new_d, b_CS+new_d, sub_1, 0, 0);
+		int** sub_a = allocateMatrix(new_d);
+		s_matrix_subtract(new_d, matrix2, matrix2, b_RS, b_CS+new_d, b_RS+new_d, b_CS+new_d, sub_a, 0, 0);
 		
 		// P_1
-		strassen(new_d, matrix1, sub_1, a_RS, a_CS, 0, 0, one);
-
-		#warning Free F-H here
+		strassen(new_d, matrix1, sub_a, a_RS, a_CS, 0, 0, one);
 
 		// A + B
-		int** sub_2 = allocateMatrix(new_d);
-		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS, a_CS+new_d, sub_2, 0, 0);
+		int** sub_b = allocateMatrix(new_d);
+		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS, a_CS+new_d, sub_b, 0, 0);
 		
 		// P_2
-		strassen(new_d, sub_2, matrix2, 0, 0, b_RS+new_d, b_CS+new_d, two);
+		strassen(new_d, sub_b, matrix2, 0, 0, b_RS+new_d, b_CS+new_d, two);
 
-		#warning Free A+B here
 
 		// C + D
-		int** sub_3 = allocateMatrix(new_d);
-		s_matrix_add(new_d, matrix1, matrix1, a_RS+new_d, a_CS, a_RS+new_d, a_CS+new_d, sub_3, 0,0);
+		s_matrix_add(new_d, matrix1, matrix1, a_RS+new_d, a_CS, a_RS+new_d, a_CS+new_d, sub_a, 0,0);
 		
 		// P_3
-		strassen(new_d, sub_3, matrix2, 0, 0, b_RS, b_CS, three);
-
-		#warning Free C+D here
+		strassen(new_d, sub_a, matrix2, 0, 0, b_RS, b_CS, three);
 
 		// G - E
-		int** sub_4 = allocateMatrix(new_d);
-		s_matrix_subtract(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS, b_CS, sub_4, 0, 0);
+		s_matrix_subtract(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS, b_CS, sub_a, 0, 0);
 		
 		// P_4
-		strassen(new_d, matrix1, sub_4, a_RS+new_d, a_CS+new_d, 0, 0, four);
-
-		#warning Free G-E here
+		strassen(new_d, matrix1, sub_a, a_RS+new_d, a_CS+new_d, 0, 0, four);
 
 		// A + D
-		int** sub_5a = allocateMatrix(new_d);
-		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS+new_d, sub_5a, 0, 0);
+		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS+new_d, sub_a, 0, 0);
 		
 		// E + H
-		int** sub_5b = allocateMatrix(new_d);
-		s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS+new_d, b_CS+new_d, sub_5b, 0, 0);
+		s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS+new_d, b_CS+new_d, sub_b, 0, 0);
 
 		// P_5
-		strassen(new_d, sub_5a, sub_5b, 0, 0, 0, 0, five);
-
-		#warning Free A+D and E+H here
+		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, five);
 
 		// B - D
-		int** sub_6a = allocateMatrix(new_d);
-		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS+new_d, a_RS+new_d, a_CS+new_d, sub_6a, 0, 0);
+		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS+new_d, a_RS+new_d, a_CS+new_d, sub_a, 0, 0);
 		
 		// G + H
-		int** sub_6b = allocateMatrix(new_d);
-		s_matrix_add(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS+new_d, b_CS+new_d, sub_6b, 0, 0);
+		s_matrix_add(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS+new_d, b_CS+new_d, sub_b, 0, 0);
 
 		// P_6
-		strassen(new_d, sub_6a, sub_6b, 0, 0, 0, 0, six);
+		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, six);
 
-		#warning Free B-D and G+H here
 
 		// A - C
-		int** sub_7a = allocateMatrix(new_d);
-		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS, sub_7a, 0, 0);
+		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS, sub_a, 0, 0);
 		
 		// E + F
-		int** sub_7b = allocateMatrix(new_d);
-		s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS, b_CS+new_d, sub_7b, 0, 0);
+		s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS, b_CS+new_d, sub_b, 0, 0);
 
 		// P_7
-		strassen(new_d, sub_7a, sub_7b, 0, 0, 0, 0, seven);
+		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, seven);
 
-		#warning Free A-C and E+F here
+		#warning Free sub_a and sub_b here
 
 		//Calculating the four sub matrices
 
@@ -269,8 +251,6 @@ int main(void){
 	int** a = allocateMatrix(x); //first input matrix
 	int** b = allocateMatrix(x); //second input matrix
 
-	#warning Make compatible with non-power of 2
-	printf("If that wasn't a power of 2, this will probably break. Whoops.\n");
 	
 	printf("Enter the values of the first matrix:\n");
 	for (int i=0; i<d; i++){
@@ -306,15 +286,9 @@ int main(void){
 	printf("The strassen product of the two matrices is:\n");
 	display_mat(d,s_c);
 
-	//Addition
-	int** e = allocateMatrix(d);
-	matrix_add(d,a,b,e);
-	printf("The sum of the two matrices is:\n");
-	display_mat(d,e);
-
-	//Subtraction
+	//Subtraction of Standard and Strassen... to check if they're the same
 	int** f = allocateMatrix(d);
-	matrix_subtract(d,a,b,f);
+	matrix_subtract(d,c,s_c,f);
 	printf("The difference of the two matrices is:\n");
 	display_mat(d,f);
 
@@ -322,11 +296,11 @@ int main(void){
 	freeMatrix(a,d);
 	freeMatrix(b,d);
 	freeMatrix(c,d);
-	freeMatrix(e,d);
+	//freeMatrix(e,d);
 	freeMatrix(f,d);
 
 	#warning Do we actually need to free things if it's the last thing in the program?
-	// Sure, good practice, but wastes time though they'll be freed when code terminates
+	// Sure, good practice, but wastes time though since they'll be freed when code terminates
 	printf("Everything has now been freed!\n");
 	return 0;
 }
