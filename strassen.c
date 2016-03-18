@@ -25,7 +25,6 @@ void freeMatrix(int** m, int d){
 
 // Standard matrix multiplication
 void standard_mult(int d, int** a, int** b, int** answer){
-	// int** c = m_malloc(dim);
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
 			answer[i][j] = 0;
@@ -48,8 +47,6 @@ void display_mat(int d, int** matrix){
 	}
 }
 
-// matrix addition
-
 // Strassen add, tracking indexes
 // RS = row start
 // CS = column start
@@ -61,7 +58,7 @@ void s_matrix_add(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, int b_C
 	}
 }
 
-// Full add, no matrices tracked
+// Full add, no indexes tracked
 void matrix_add(int d, int** a, int** b, int** answer){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
@@ -82,7 +79,7 @@ void s_matrix_subtract(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, in
 	}
 }
 
-// Full subtract, no matrices tracked
+// Full subtract, no indexes tracked
 void matrix_subtract(int d, int** a, int** b, int** answer){
 
 	for (int i=0; i<d; i++){
@@ -93,13 +90,16 @@ void matrix_subtract(int d, int** a, int** b, int** answer){
 }
 
 #warning Only works for powers of 2
+
+// Still not sure whether this -- and other functions -- should be void, or should be returning an int** double pointer to matrix
+// I think returning pointers could make code more legible and clearner, but in any case, it works as is, so it's of low priority
 void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS, int b_CS, int** answer){
 	#warning Eventually this should be "if d < CROSSOVER"
 	if(d==1){
-		#warning Does this base case work?
 		answer[0][0] = matrix1[a_RS][a_CS] * matrix2[b_RS][b_CS];
 	}
 	else{
+
 		int new_d = d/2;
 
 		#warning Are these too many allocations?
@@ -186,7 +186,7 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 
 		#warning Free A-C and E+F here
 
-		//Calculating the four sub matrices...
+		//Calculating the four sub matrices
 
 		// AE + BG ... top left
 		s_matrix_add(new_d, five, four, 0, 0, 0, 0, answer, 0+new_d, 0);
@@ -205,8 +205,7 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		s_matrix_add(new_d, three, four, 0, 0, 0, 0, answer, 0+new_d, 0);
 
 		/*
-
-		Code for debugging. Can delete later!
+		*** Code for debugging. Can delete later! ***
 
 		printf("One:\n");
 		display_mat(new_d, one);
@@ -233,7 +232,6 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 	}
 }
 
-//main function that lets user test
 int main(void){
 	int d;
 	printf("Enter the dimension of square matrices to be multiplied:\n");
@@ -241,8 +239,6 @@ int main(void){
 	#warning Make compatible with non-power of 2
 	printf("If that wasn't a power of 2, this will probably break. Whoops.\n");
 	
-	// int** m1 = m_malloc(d);
-	// int** m2 = m_malloc(d);
 	int** a = allocateMatrix(d);
 
 	printf("Enter the values of the first matrix:\n");
@@ -267,10 +263,10 @@ int main(void){
 	printf("The standard product of the two matrices is:\n");
 	display_mat(d,c);
 
-	int** c_s = allocateMatrix(d);
-	strassen(d, a, b, 0, 0, 0, 0, c_s);
+	int** s_c = allocateMatrix(d);
+	strassen(d, a, b, 0, 0, 0, 0, s_c);
 	printf("The strassen product of the two matrices is:\n");
-	display_mat(d,c_s);
+	display_mat(d,s_c);
 
 
 	int** e = allocateMatrix(d);
@@ -284,13 +280,14 @@ int main(void){
 	matrix_subtract(d,a,b,f);
 	printf("The difference of the two matrices is:\n");
 	display_mat(d,f);
-	// m_free(m1,d);
-	// m_free(m2,d);
 	freeMatrix(a,d);
 	freeMatrix(b,d);
 	freeMatrix(c,d);
 	freeMatrix(e,d);
 	freeMatrix(f,d);
+
+	#warning Do we actually need to free things if it's the last thing in the program?
+	// Sure, good practice, but wastes time though they'll be freed when code terminates
 	printf("Everything has now been freed!\n");
 	return 0;
 }
