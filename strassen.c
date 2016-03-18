@@ -7,26 +7,19 @@
 void strassen(int, int**, int**, int, int, int, int, int**);
 
 // Allocates memory for a square matrix of size d x d using double pointers...
-int isPowerofTwo(int n){
-	while(((n%2)==0) && n>1)
-		n/=2;
-	return (n==1);
-}
-
 #warning Will still need to free at some point…
 int** allocateMatrix(int d) {
     int** matrix;
-    matrix = (int**) malloc(d*sizeof(int*));
-    for (int i = 0; i < d; i++)
-        matrix[i] = (int*) malloc(d*sizeof(int));
-    for (int i=0;i<d;i++){
-    	for (int j=0;j<d;j++){
-    		matrix[i][j]=0;
+    matrix = (int**) malloc(d*sizeof(int*)); //allocate space for d rows of ints
+    for (int i = 0; i < d; i++){
+        matrix[i] = (int*) malloc(d*sizeof(int)); //allocate enough space for d columns of ints
+        for (int j=0;j<d;j++){
+    		matrix[i][j]=0; //solves padding 0 problem for non-powers of 2
     	}
     }
     return matrix;
 }
-
+// Frees said square matrix
 void freeMatrix(int** m, int d){
 	for (int i = 0; i < d; i++)
 		free(m[i]);
@@ -34,20 +27,19 @@ void freeMatrix(int** m, int d){
 	return;
 }
 
+// Checks if an integer is a power of 2
+int isPowerofTwo(int n){
+	while(((n%2)==0) && n>1)
+		n/=2;
+	return (n==1);
+}
+
+// Looks for next power of two (greater than or equal to d)
 int nextPowofTwo(int d){
 	double n = ceil(log2(((double) d)));
 	int x = (int) pow((double) 2, n);
 	return x;
 }
-
-// void padMatrix(int** m, int d){
-// 	n = nextPowofTwo(d);
-// 	for (int i=0;i<d;i++){
-// 		for (int j=d;j<n;j++){
-// 			m[i][j]=0;
-// 		}
-// 	}
-// }
 
 // Standard matrix multiplication
 void standard_mult(int d, int** a, int** b, int** answer){
@@ -70,11 +62,6 @@ void display_mat(int d, int** matrix){
 				printf("\n");
 			}
 		}
-	}
-}
-void print_mat(int d, int** matrix){
-	for (int i=0; i<d; i++){
-		printf("%d\n", matrix[i][d]);
 	}
 }
 
@@ -271,11 +258,11 @@ int main(void){
 
 	//Check if input integer is a power of 2
 	if(isPowerofTwo(d)==1){
-		//Allocate memory to fit size d matrix
+		//Allocate memory to fit size d matrix - powers of 2
 		printf("This is a power of two\n");
 	}
 	else{
-		//Allocate memory to fit size x matrix
+		//Allocate memory to fit size x matrix - non-powers of 2
 		printf("This is not a power of two\n");
 		printf("Next power of two is %d\n",x);
 	}
@@ -285,7 +272,6 @@ int main(void){
 	#warning Make compatible with non-power of 2
 	printf("If that wasn't a power of 2, this will probably break. Whoops.\n");
 	
-	//int** a = allocateMatrix(d);
 	printf("Enter the values of the first matrix:\n");
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
@@ -296,8 +282,6 @@ int main(void){
 	display_mat(d, a);
 	//Check non-powers of 2
 	//display_mat(x, a);
-
-	//int** b = allocateMatrix(d);
 
 	printf("Enter the values of the second matrix:\n");
 	for (int i=0; i<d; i++){
