@@ -6,18 +6,18 @@
 
 void strassen(int, int**, int**, int, int, int, int, int**);
 
-// Allocates memory for a square matrix of size N x N using double pointers...
+// Allocates memory for a square matrix of size d x d using double pointers...
 #warning Will still need to free at some point…
-int** allocateMatrix(int N) {
+int** allocateMatrix(int d) {
     int** matrix;
-    matrix = (int**) malloc(N*sizeof(int*));
-    for (int i = 0; i < N; i++)
-        matrix[i] = (int*) malloc(N*sizeof(int));
+    matrix = (int**) malloc(d*sizeof(int*));
+    for (int i = 0; i < d; i++)
+        matrix[i] = (int*) malloc(d*sizeof(int));
     return matrix;
 }
 
-void freeMatrix(int** m, int N){
-	for (int i = 0; i < N; i++)
+void freeMatrix(int** m, int d){
+	for (int i = 0; i < d; i++)
 		free(m[i]);
 	free(m);
 	return;
