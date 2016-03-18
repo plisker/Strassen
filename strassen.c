@@ -7,6 +7,12 @@
 void strassen(int, int**, int**, int, int, int, int, int**);
 
 // Allocates memory for a square matrix of size d x d using double pointers...
+int isPowerofTwo(int n){
+	while(((n%2)==0) && n>1)
+		n/=2;
+	return (n==1);
+}
+
 #warning Will still need to free at some point…
 int** allocateMatrix(int d) {
     int** matrix;
@@ -21,6 +27,17 @@ void freeMatrix(int** m, int d){
 		free(m[i]);
 	free(m);
 	return;
+}
+
+int nextPowofTwo(int d){
+	double n = ceil(log2(((double) d)));
+	int x = (int) pow((double) 2, n);
+	return x;
+}
+
+void padMatrix(int** m, int d){
+	n = nextPowofTwo(d);
+	
 }
 
 // Standard matrix multiplication
@@ -236,6 +253,14 @@ int main(void){
 	int d;
 	printf("Enter the dimension of square matrices to be multiplied:\n");
 	scanf("%i",&d);
+	if (isPowerofTwo(d)==1)
+		printf("This is a power of two\n");
+	else{
+		printf("This is not a power of two\n");
+		int x = nextPowofTwo(d);
+		printf("Next power of two is %d\n",x);
+	}
+
 	#warning Make compatible with non-power of 2
 	printf("If that wasn't a power of 2, this will probably break. Whoops.\n");
 	
