@@ -4,24 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-// allocates & initializes a matrix of size dim
-// int** m_malloc(dim){
-// 	int** m = (int**) malloc(dim * sizeof(int*));
-// 	for (int i=0; i<dim; i++){
-// 		m[i]=(int*) malloc(dim * sizeof(int));
-// 	}
-// 	return m;
-// }
-
-// // frees said matrix of size dim
-// void m_free(int** m, int dim){
-// 	for (int i=0; i<dim; i++){
-// 		free(m[i]);
-// 	}
-// 	free(m);
-// 	return;
-// }
-
+void strassen(int, int**, int**, int, int, int, int, int**);
 
 // Allocates memory for a square matrix of size N x N using double pointers...
 //warning Will still need to free at some point…
@@ -68,10 +51,33 @@ void display_mat(int d, int** matrix){
 
 //STRASSEN ALGORITHM
 // matrix addition
+
+// strassen add, tracking indexes
+// RS = row start
+// CS = column start
+void s_matrix_add(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, int b_CS, int** answer, int c_RS, int c_CS){
+	for (int i=0; i<d; i++){
+		for (int j=0; j<d; j++){
+			answer[i+c_RS][j+c_CS] = a[i+a_RS][j+a_CS]+b[i+b_RS][j+b_CS];
+		}
+	}
+}
+
+//full add, no matrices tracked
 void matrix_add(int d, int** a, int** b, int** answer){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
 			answer[i][j] = a[i][j]+b[i][j];
+		}
+	}
+}
+
+//strassen add, tracking indexes
+void s_matrix_subtract(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, int b_CS, int** answer, int c_RS, int c_CS){
+
+	for (int i=0; i<d; i++){
+		for (int j=0; j<d; j++){
+			answer[i+c_RS][j+c_CS] = a[i+a_RS][j+a_CS]-b[i+b_RS][j+b_CS];
 		}
 	}
 }
@@ -86,13 +92,131 @@ void matrix_subtract(int d, int** a, int** b, int** answer){
 	}
 }
 
+#warning Only works for powers of 2
+void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS, int b_CS, int** answer){
+	#warning Eventually this should be "if d < CROSSOVER"
+	if(d==1){
+		#warning Does this base case work?
+		answer[0][0] = matrix1[a_RS][a_CS] * matrix2[b_RS][b_CS];
+	}
+	else{
+		int new_d = d/2;
+
+		#warning Are these too many allocations?
+		int** one = allocateMatrix(new_d);
+		int** two = allocateMatrix(new_d);
+		int** three = allocateMatrix(new_d);
+		int** four = allocateMatrix(new_d);
+		int** five = allocateMatrix(new_d);
+		int** six = allocateMatrix(new_d);
+		int** seven = allocateMatrix(new_d);
+
+		// F - H
+		int** sub_1 = allocateMatrix(new_d);
+		s_matrix_subtract(new_d, matrix2, matrix2, b_RS, b_CS+new_d, b_RS+new_d, b_CS+new_d, sub_1, 0, 0);
+		
+		// P_1
+		strassen(new_d, matrix1, sub_1, a_RS, a_CS, 0, 0, one);
+
+		#warning Free F-H here
+
+		// A + B
+		int** sub_2 = allocateMatrix(new_d);
+		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS, a_CS+new_d, sub_2, 0, 0);
+		
+		// P_2
+		strassen(new_d, sub_2, matrix2, 0, 0, b_RS+new_d, b_CS+new_d, two);
+
+		#warning Free A+B here
+
+		// C + D
+		int** sub_3 = allocateMatrix(new_d);
+		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS+new_d, a_RS+new_d, a_CS+new_d, sub_3, 0, 0);
+		
+		// P_3
+		strassen(new_d, sub_3, matrix2, 0, 0, b_RS, b_CS, three);
+
+		#warning Free C+D here
+
+		// G - E
+		int** sub_4 = allocateMatrix(new_d);
+		s_matrix_subtract(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS, b_CS, sub_4, 0, 0);
+		
+		// P_4
+		strassen(new_d, matrix1, sub_4, a_RS+new_d, a_CS+new_d, 0, 0, four);
+
+		#warning Free G-E here
+
+		// A + D
+		int** sub_5a = allocateMatrix(new_d);
+		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS+new_d, sub_5a, 0, 0);
+		
+		// E + H
+		int** sub_5b = allocateMatrix(new_d);
+		s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS+new_d, b_CS+new_d, sub_5b, 0, 0);
+
+		// P_5
+		strassen(new_d, sub_5a, sub_5b, 0, 0, 0, 0, five);
+
+		#warning Free A+D and E+H here
+
+		// B - D
+		int** sub_6a = allocateMatrix(new_d);
+		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS+new_d, a_RS+new_d, a_CS+new_d, sub_6a, 0, 0);
+		
+		// G + H
+		int** sub_6b = allocateMatrix(new_d);
+		s_matrix_add(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS+new_d, b_CS+new_d, sub_6b, 0, 0);
+
+		// P_6
+		strassen(new_d, sub_6a, sub_6b, 0, 0, 0, 0, six);
+
+		#warning Free B-D and G+H here
+
+		// A - C
+		int** sub_7a = allocateMatrix(new_d);
+		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS, sub_7a, 0, 0);
+		
+		// E + F
+		int** sub_7b = allocateMatrix(new_d);
+		s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS, b_CS+new_d, sub_7b, 0, 0);
+
+		// P_7
+		strassen(new_d, sub_7a, sub_7b, 0, 0, 0, 0, seven);
+
+		#warning Free A-C and E+F here
+
+		//Calculating the four sub matrices...
+
+		// AE + BG ... top left
+		s_matrix_add(new_d, five, four, 0, 0, 0, 0, answer, 0+new_d, 0);
+		s_matrix_add(new_d, two, six, 0, 0, 0, 0, answer, 0+new_d, 0+new_d);
+		s_matrix_subtract(new_d, answer, answer, 0+new_d, 0, 0+new_d, 0+new_d, answer, 0, 0);
+
+		// CF + DH ... bottom right
+		s_matrix_add(new_d, five, one, 0, 0, 0, 0, answer, 0+new_d, 0);
+		s_matrix_subtract(new_d, three, seven, 0, 0, 0, 0, answer, 0, 0+new_d);
+		s_matrix_subtract(new_d, answer, answer, 0+new_d, 0, 0, 0+new_d, answer, 0+new_d, 0+new_d);
+
+		// AF + BH ... top right
+		s_matrix_add(new_d, one, two, 0, 0, 0, 0, answer, 0, 0+new_d);
+		
+		// CE + DG ... bottom left
+		s_matrix_add(new_d, three, four, 0, 0, 0, 0, answer, 0+new_d, 0);
+
+	}
+}
+
 //main function that lets user test
 int main(void){
 	int d;
 	//What was tis supposed to be?
 	//printf("Size of matrix is %d\n", (int) sizeof(a));
 	printf("Enter the dimension of square matrices to be multiplied:\n");
-	scanf("%d",&d);
+	scanf("%i",&d);
+	#warning Make compatible with non-power of 2
+	printf("If that wasn't a power of 2, this will probably break. Whoops.\n");
+	
 	// int** m1 = m_malloc(d);
 	// int** m2 = m_malloc(d);
 	int** a = allocateMatrix(d);
@@ -116,8 +240,14 @@ int main(void){
 	int** c = allocateMatrix(d);
 
 	standard_mult(d,a,b,c);
-	printf("The product of the two matrices is:\n");
+	printf("The standard product of the two matrices is:\n");
 	display_mat(d,c);
+
+	int** c_s = allocateMatrix(d);
+	strassen(d, a, b, 0, 0, 0, 0, c_s);
+	printf("The strassen product of the two matrices is:\n");
+	display_mat(d,c_s);
+
 
 	int** e = allocateMatrix(d);
 
@@ -137,6 +267,6 @@ int main(void){
 	freeMatrix(c,d);
 	freeMatrix(e,d);
 	freeMatrix(f,d);
-	printf("Everything has been freed!");
+	printf("Everything has been freed!\n");
 	return 0;
 }
