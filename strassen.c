@@ -267,28 +267,20 @@ int main(void){
 	int d;
 	printf("Enter the dimension of square matrices to be multiplied:\n");
 	scanf("%i",&d);
-	int** a; //first input matrix
-	int** b; //second input matrix
-	int** c; //standard result matrix
-	int** s_c; //strassen result matrix
 	int x = nextPowofTwo(d); //2^ceil(log_2(d))
 
 	//Check if input integer is a power of 2
 	if(isPowerofTwo(d)==1){
 		//Allocate memory to fit size d matrix
 		printf("This is a power of two\n");
-		a = allocateMatrix(d);
-		b = allocateMatrix(d);
-		s_c = allocateMatrix(d);
 	}
 	else{
 		//Allocate memory to fit size x matrix
 		printf("This is not a power of two\n");
 		printf("Next power of two is %d\n",x);
-		a = allocateMatrix(x);
-		b = allocateMatrix(x);
-		s_c = allocateMatrix(x);
 	}
+	int** a = allocateMatrix(x); //first input matrix
+	int** b = allocateMatrix(x); //second input matrix
 
 	#warning Make compatible with non-power of 2
 	printf("If that wasn't a power of 2, this will probably break. Whoops.\n");
@@ -318,14 +310,14 @@ int main(void){
 	//Check non-powers of 2
 	//display_mat(x, b);
 
-	c = allocateMatrix(d);
-
 	//Standard multiplication
+	int** c = allocateMatrix(d); //standard result matrix
 	standard_mult(d,a,b,c);
 	printf("The standard product of the two matrices is:\n");
 	display_mat(d,c);
 
 	//Strassen multiplication
+	int** s_c = allocateMatrix(x); //strassen result matrix
 	strassen(x, a, b, 0, 0, 0, 0, s_c);	
 	printf("The strassen product of the two matrices is:\n");
 	display_mat(d,s_c);
