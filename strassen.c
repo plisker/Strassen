@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdbool.h>
 
 void strassen(int, int**, int**, int, int, int, int, int**);
 
@@ -245,72 +246,154 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 	}
 }
 
-int main(void){
-	int d;
-	printf("Enter the dimension of square matrices to be multiplied:\n");
-	scanf("%i",&d);
-	int x = nextPowofTwo(d); //2^ceil(log_2(d))
+int main(int argc, char *argv[]){
 
-	//Check if input integer is a power of 2
-	if(isPowerofTwo(d)==1){
-		//Allocate memory to fit size d matrix - powers of 2
-		printf("This is a power of two\n");
+	if(argc < 4){
+		printf("Not enough arguments!\n");
+		return 1;
 	}
-	else{
-		//Allocate memory to fit size x matrix - non-powers of 2
-		printf("This is not a power of two\n");
-		printf("Next power of two is %d\n",x);
+	else if (argc > 4){
+		printf("Too many arguments!\n");
+		return 2;
 	}
-	int** a = allocateMatrix(x); //first input matrix
-	int** b = allocateMatrix(x); //second input matrix
 
-	
-	printf("Enter the values of the first matrix:\n");
-	for (int i=0; i<d; i++){
-		for (int j=0; j<d; j++){
-			scanf("%d", &a[i][j]);
+	// If flag is 1, for our own testing
+	if(atoi(argv[1])==1){
+		int d;
+		printf("Enter the dimension of square matrices to be multiplied:\n");
+		scanf("%i",&d);
+		int x = nextPowofTwo(d); //2^ceil(log_2(d))
+
+		//Check if input integer is a power of 2
+		if(isPowerofTwo(d)==1){
+			//Allocate memory to fit size d matrix - powers of 2
+			printf("This is a power of two\n");
 		}
-	}
-	printf("Your first input matrix is:\n");
-	display_mat(d, a);
-	//Check non-powers of 2
-	//display_mat(x, a);
-
-	printf("Enter the values of the second matrix:\n");
-	for (int i=0; i<d; i++){
-		for (int j=0; j<d; j++){
-			scanf("%d", &b[i][j]);
+		else{
+			//Allocate memory to fit size x matrix - non-powers of 2
+			printf("This is not a power of two\n");
+			printf("Next power of two is %d\n",x);
 		}
+		int** a = allocateMatrix(x); //first input matrix
+		int** b = allocateMatrix(x); //second input matrix
+
+		
+		printf("Enter the values of the first matrix:\n");
+		for (int i=0; i<d; i++){
+			for (int j=0; j<d; j++){
+				scanf("%d", &a[i][j]);
+			}
+		}
+		printf("Your first input matrix is:\n");
+		display_mat(d, a);
+		//Check non-powers of 2
+		//display_mat(x, a);
+
+		printf("Enter the values of the second matrix:\n");
+		for (int i=0; i<d; i++){
+			for (int j=0; j<d; j++){
+				scanf("%d", &b[i][j]);
+			}
+		}
+		printf("Your second input matrix is:\n");
+		display_mat(d, b);
+		//Check non-powers of 2
+		//display_mat(x, b);
+
+
+		//Standard multiplication
+		int** c = allocateMatrix(d); //standard result matrix
+		standard_mult(d,a,b,c);
+		
+		//Strassen multiplication
+		int** s_c = allocateMatrix(x); //strassen result matrix
+		strassen(x, a, b, 0, 0, 0, 0, s_c);	
+
+		printf("The final output (diagonal of product matrix) from the specs should be this:\n");
+		display_diagonal(d, s_c);
+		
+		printf("The standard product of the two matrices is:\n");
+		display_mat(d,c);
+
+		printf("The strassen product of the two matrices is:\n");
+		display_mat(d,s_c);
+
+		//Subtraction of Standard and Strassen... to check if they're the same
+		int** f = allocateMatrix(d);
+		matrix_subtract(d,c,s_c,f);
+		printf("The difference of the two matrices should be all 0s:\n");
+		display_mat(d,f);
+
+		#warning Do we need to free things here at the end?
+		return 0;
 	}
-	printf("Your second input matrix is:\n");
-	display_mat(d, b);
-	//Check non-powers of 2
-	//display_mat(x, b);
+
+	// If flag is 0, as per pset specs.
+	if(atoi(argv[1])==0){
+		int d = atoi(argv[2]);
+		int x = nextPowofTwo(d);
+
+		// Save the filename
+		const char* filename = argv[3];
+
+		int** a = allocateMatrix(x); //first input matrix
+		int** b = allocateMatrix(x); //second input matrix
+		
+		#warning Remove one when this section works.
+		int** c = allocateMatrix(d); //standard result matrix
+		int** s_c = allocateMatrix(x); //strassen result matrix
+		
+		#warning Remove when this section works.
+		int** f = allocateMatrix(d); //difference
 
 
-	//Standard multiplication
-	int** c = allocateMatrix(d); //standard result matrix
-	standard_mult(d,a,b,c);
-	
-	//Strassen multiplication
-	int** s_c = allocateMatrix(x); //strassen result matrix
-	strassen(x, a, b, 0, 0, 0, 0, s_c);	
+		FILE* file = fopen(filename, "r");
 
-	printf("The final output (diagonal of product matrix) from the specs should be this:\n");
-	display_diagonal(d, s_c);
-	
-	printf("The standard product of the two matrices is:\n");
-	display_mat(d,c);
+		//To fill up matrices from text file
+		int i = 0;
+		int j = 0;
+		bool first_matrix = true;
+		int number;
+		while(fscanf(file, "%d" , &number) > 0) {
+			if(first_matrix){
+				a[i][j]=number;
+				j++;
+				if(j==d){
+					j=0;
+					i++;
+					if(i==d){
+						first_matrix = false;
+						i = 0;
+					}
+				}
+			}
+			else{
+				if(j==d){
+					j=0;
+					i+=1;
+				}
+				b[i][j]=number;
+				j++;
+			}
+		}
+		fclose(file);
 
-	printf("The strassen product of the two matrices is:\n");
-	display_mat(d,s_c);
+		printf("Your first input matrix is:\n");
+		display_mat(d, a);
 
-	//Subtraction of Standard and Strassen... to check if they're the same
-	int** f = allocateMatrix(d);
-	matrix_subtract(d,c,s_c,f);
-	printf("The difference of the two matrices should be all 0s:\n");
-	display_mat(d,f);
+		printf("Your second input matrix is:\n");
+		display_mat(d, b);
 
-	#warning Do we need to free things here at the end?
-	return 0;
+		standard_mult(d,a,b,c);
+		printf("The standard product of the two matrices is:\n");
+		display_mat(d,c);
+
+		strassen(x, a, b, 0, 0, 0, 0, s_c);
+		printf("The strassen product of the two matrices is:\n");
+		display_mat(d,s_c);
+
+		matrix_subtract(d,c,s_c,f);
+		printf("The difference of the two matrices should be all 0s:\n");
+		display_mat(d,f);
+	}
 }
