@@ -328,7 +328,7 @@ int main(int argc, char *argv[]){
 		return 0;
 	}
 
-	// If flag is 0, as per pset specs.
+	// If flag is 0, as per pset specs, returns just the diagonal result.
 	if(atoi(argv[1])==0){
 		int d = atoi(argv[2]);
 		int x = nextPowofTwo(d);
@@ -339,14 +339,8 @@ int main(int argc, char *argv[]){
 		int** a = allocateMatrix(x); //first input matrix
 		int** b = allocateMatrix(x); //second input matrix
 		
-		#warning Remove one when this section works.
-		int** c = allocateMatrix(d); //standard result matrix
-		int** s_c = allocateMatrix(x); //strassen result matrix
+		int** s_c = allocateMatrix(x); //result matrix
 		
-		#warning Remove when this section works.
-		int** f = allocateMatrix(d); //difference
-
-
 		FILE* file = fopen(filename, "r");
 
 		//To fill up matrices from text file
@@ -378,25 +372,8 @@ int main(int argc, char *argv[]){
 		}
 		fclose(file);
 
-		printf("Your first input matrix is:\n");
-		display_mat(d, a);
-
-		printf("Your second input matrix is:\n");
-		display_mat(d, b);
-
-		standard_mult(d,a,b,c);
-		printf("The standard product of the two matrices is:\n");
-		display_mat(d,c);
-
 		strassen(x, a, b, 0, 0, 0, 0, s_c);
-		printf("The strassen product of the two matrices is:\n");
-		display_mat(d,s_c);
 
-		matrix_subtract(d,c,s_c,f);
-		printf("The difference of the two matrices should be all 0s:\n");
-		display_mat(d,f);
-
-		printf("The final output (diagonal of product matrix) from the specs should be this:\n");
 		display_diagonal(d, s_c);
 	}
 }
