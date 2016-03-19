@@ -67,6 +67,12 @@ void display_mat(int d, int** matrix){
 	}
 }
 
+void display_diagonal(int d, int** matrix){
+	for (int i=0; i<d; i++){
+		printf("%d\n", matrix[i][i]);
+	}
+}
+
 // Strassen add, tracking indexes
 // RS = row start
 // CS = column start
@@ -281,15 +287,21 @@ int main(void){
 	//Check non-powers of 2
 	//display_mat(x, b);
 
+
 	//Standard multiplication
 	int** c = allocateMatrix(d); //standard result matrix
 	standard_mult(d,a,b,c);
-	printf("The standard product of the two matrices is:\n");
-	display_mat(d,c);
-
+	
 	//Strassen multiplication
 	int** s_c = allocateMatrix(x); //strassen result matrix
 	strassen(x, a, b, 0, 0, 0, 0, s_c);	
+
+	printf("The final output from the specs should be this:\n");
+	display_diagonal(d, s_c);
+	
+	printf("The standard product of the two matrices is:\n");
+	display_mat(d,c);
+
 	printf("The strassen product of the two matrices is:\n");
 	display_mat(d,s_c);
 
