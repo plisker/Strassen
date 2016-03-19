@@ -367,6 +367,9 @@ int main(int argc, char *argv[]){
 					j=0;
 					i+=1;
 				}
+				if(i==d){
+					i=0;
+				}
 				b[i][j]=number;
 				j++;
 			}
