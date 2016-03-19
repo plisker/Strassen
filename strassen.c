@@ -296,7 +296,7 @@ int main(void){
 	int** s_c = allocateMatrix(x); //strassen result matrix
 	strassen(x, a, b, 0, 0, 0, 0, s_c);	
 
-	printf("The final output from the specs should be this:\n");
+	printf("The final output (diagonal of product matrix) from the specs should be this:\n");
 	display_diagonal(d, s_c);
 	
 	printf("The standard product of the two matrices is:\n");
