@@ -247,6 +247,7 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 }
 
 int main(int argc, char *argv[]){
+#warning Segfault is occurring for 1024 x 1024 matrices. Must be fixed.
 
 	if(argc < 4){
 		printf("Not enough arguments!\n");
