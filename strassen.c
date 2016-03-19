@@ -395,5 +395,8 @@ int main(int argc, char *argv[]){
 		matrix_subtract(d,c,s_c,f);
 		printf("The difference of the two matrices should be all 0s:\n");
 		display_mat(d,f);
+
+		printf("The final output (diagonal of product matrix) from the specs should be this:\n");
+		display_diagonal(d, s_c);
 	}
 }
