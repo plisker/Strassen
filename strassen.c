@@ -45,6 +45,7 @@ int nextPowofTwo(int d){
 }
 
 // Standard matrix multiplication
+#warning Optimize (or confirm that it is) by re-ordering the loops to take advantage of caching
 void standard_mult(int d, int** a, int** b, int** answer){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
