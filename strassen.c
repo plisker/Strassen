@@ -99,7 +99,6 @@ void matrix_add(int d, int** a, int** b, int** answer){
 // RS = row start
 // CS = column start
 void s_matrix_subtract(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, int b_CS, int** answer, int c_RS, int c_CS){
-
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
 			answer[i+c_RS][j+c_CS] = a[i+a_RS][j+a_CS]-b[i+b_RS][j+b_CS];
@@ -109,7 +108,6 @@ void s_matrix_subtract(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, in
 
 // Full subtract, no indexes tracked
 void matrix_subtract(int d, int** a, int** b, int** answer){
-
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
 			answer[i][j] = a[i][j]-b[i][j];
@@ -117,8 +115,8 @@ void matrix_subtract(int d, int** a, int** b, int** answer){
 	}
 }
 
-// Still not sure whether this -- and other functions -- should be void, or should be returning an int** double pointer to matrix
-// I think returning pointers could make code more legible and clearner, but in any case, it works as is, so it's of low priority
+// RS = row start
+// CS = column start
 void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS, int b_CS, int** answer){
 	#warning Eventually this should be "if d < CROSSOVER"
 	if(d==1){
@@ -190,11 +188,11 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS, b_CS+new_d, sub_b, 0, 0);
 
 		// P_7
-		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, six);
+		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, six/*now Seven*/);
 
 
 		// CF + DH ... bottom right... begin
-		s_matrix_subtract(new_d, five, six, 0, 0, 0, 0, answer, 0+new_d, 0);
+		s_matrix_subtract(new_d, five, six/*now Seven*/, 0, 0, 0, 0, answer, 0+new_d, 0);
 
 
 		//Repurpose Seven (formerly Six) as Three
@@ -202,7 +200,7 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		s_matrix_add(new_d, matrix1, matrix1, a_RS+new_d, a_CS, a_RS+new_d, a_CS+new_d, sub_a, 0,0);
 		
 		// P_3
-		strassen(new_d, sub_a, matrix2, 0, 0, b_RS, b_CS, six);
+		strassen(new_d, sub_a, matrix2, 0, 0, b_RS, b_CS, six/*now Three*/);
 
 
 
@@ -215,19 +213,19 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		s_matrix_subtract(new_d, matrix2, matrix2, b_RS, b_CS+new_d, b_RS+new_d, b_CS+new_d, sub_a, 0, 0);
 		
 		// P_1
-		strassen(new_d, matrix1, sub_a, a_RS, a_CS, 0, 0, five);
+		strassen(new_d, matrix1, sub_a, a_RS, a_CS, 0, 0, five/*now One*/);
 
 
 		// CF + DH ... bottom right... end
-		s_matrix_add(new_d, answer, five, 0, 0+new_d, 0, 0, answer, 0+new_d, 0+new_d);
+		s_matrix_add(new_d, answer, five/*now One*/, 0, 0+new_d, 0, 0, answer, 0+new_d, 0+new_d);
 
 
 		//Calculating the other two sub matrices
 		// AF + BH ... top right
-		s_matrix_add(new_d, five, two, 0, 0, 0, 0, answer, 0, 0+new_d);
+		s_matrix_add(new_d, five/*now One*/, two, 0, 0, 0, 0, answer, 0, 0+new_d);
 		
 		// CE + DG ... bottom left
-		s_matrix_add(new_d, six, four, 0, 0, 0, 0, answer, 0+new_d, 0);
+		s_matrix_add(new_d, six/*now Three*/, four, 0, 0, 0, 0, answer, 0+new_d, 0);
 
 
 		freeMatrix(two, new_d);
