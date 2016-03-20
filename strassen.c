@@ -129,39 +129,31 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		int new_d = d/2;
 
 		#warning Are these too many allocations?
-		int** one = allocateMatrix(new_d);
 		int** two = allocateMatrix(new_d);
-		int** three = allocateMatrix(new_d);
 		int** four = allocateMatrix(new_d);
 		int** five = allocateMatrix(new_d);
 		int** six = allocateMatrix(new_d);
-		int** seven = allocateMatrix(new_d);
 
-		// F - H
 		int** sub_a = allocateMatrix(new_d);
-		s_matrix_subtract(new_d, matrix2, matrix2, b_RS, b_CS+new_d, b_RS+new_d, b_CS+new_d, sub_a, 0, 0);
-		
-		// P_1
-		strassen(new_d, matrix1, sub_a, a_RS, a_CS, 0, 0, one);
+		int** sub_b = allocateMatrix(new_d);
+
+
 
 		// A + B
-		int** sub_b = allocateMatrix(new_d);
 		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS, a_CS+new_d, sub_b, 0, 0);
 		
 		// P_2
 		strassen(new_d, sub_b, matrix2, 0, 0, b_RS+new_d, b_CS+new_d, two);
 
-		// C + D
-		s_matrix_add(new_d, matrix1, matrix1, a_RS+new_d, a_CS, a_RS+new_d, a_CS+new_d, sub_a, 0,0);
-		
-		// P_3
-		strassen(new_d, sub_a, matrix2, 0, 0, b_RS, b_CS, three);
+
 
 		// G - E
 		s_matrix_subtract(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS, b_CS, sub_a, 0, 0);
 		
 		// P_4
 		strassen(new_d, matrix1, sub_a, a_RS+new_d, a_CS+new_d, 0, 0, four);
+
+
 
 		// A + D
 		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS+new_d, sub_a, 0, 0);
@@ -172,6 +164,8 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		// P_5
 		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, five);
 
+		
+
 		// B - D
 		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS+new_d, a_RS+new_d, a_CS+new_d, sub_a, 0, 0);
 		
@@ -181,6 +175,14 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		// P_6
 		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, six);
 
+
+		// AE + BG ... top left
+		s_matrix_add(new_d, five, four, 0, 0, 0, 0, answer, 0+new_d, 0);
+		s_matrix_subtract(new_d, answer, two, 0+new_d, 0, 0, 0, answer, 0+new_d, 0+new_d);
+		s_matrix_add(new_d, answer, six, 0+new_d, 0+new_d, 0, 0, answer, 0, 0);
+
+
+		//Repurpose Six as Seven
 		// A - C
 		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS, sub_a, 0, 0);
 		
@@ -188,41 +190,57 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS, b_CS+new_d, sub_b, 0, 0);
 
 		// P_7
-		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, seven);
+		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, six);
 
-		freeMatrix(sub_a, new_d);
-		freeMatrix(sub_b, new_d);
 
-		//Calculating the four sub matrices
-		// AE + BG ... top left
-		s_matrix_add(new_d, five, four, 0, 0, 0, 0, answer, 0+new_d, 0);
-		s_matrix_subtract(new_d, answer, two, 0+new_d, 0, 0, 0, answer, 0+new_d, 0+new_d);
-		s_matrix_add(new_d, answer, six, 0+new_d, 0+new_d, 0, 0, answer, 0, 0);
+		// CF + DH ... bottom right... begin
+		s_matrix_subtract(new_d, five, six, 0, 0, 0, 0, answer, 0+new_d, 0);
 
-		// CF + DH ... bottom right
-		s_matrix_add(new_d, five, one, 0, 0, 0, 0, answer, 0+new_d, 0);
-		s_matrix_subtract(new_d, answer, three, 0+new_d, 0, 0, 0, answer, 0, 0+new_d);
-		s_matrix_subtract(new_d, answer, seven, 0, 0+new_d, 0, 0, answer, 0+new_d, 0+new_d);
 
+		//Repurpose Seven (formerly Six) as Three
+		// C + D
+		s_matrix_add(new_d, matrix1, matrix1, a_RS+new_d, a_CS, a_RS+new_d, a_CS+new_d, sub_a, 0,0);
+		
+		// P_3
+		strassen(new_d, sub_a, matrix2, 0, 0, b_RS, b_CS, six);
+
+
+
+		// CF + DH ... bottom right... continue
+		s_matrix_subtract(new_d, answer, six, 0+new_d, 0, 0, 0, answer, 0, 0+new_d);
+
+
+		// Repurpose Five as One
+		// F - H
+		s_matrix_subtract(new_d, matrix2, matrix2, b_RS, b_CS+new_d, b_RS+new_d, b_CS+new_d, sub_a, 0, 0);
+		
+		// P_1
+		strassen(new_d, matrix1, sub_a, a_RS, a_CS, 0, 0, five);
+
+
+		// CF + DH ... bottom right... end
+		s_matrix_add(new_d, answer, five, 0, 0+new_d, 0, 0, answer, 0+new_d, 0+new_d);
+
+
+		//Calculating the other two sub matrices
 		// AF + BH ... top right
-		s_matrix_add(new_d, one, two, 0, 0, 0, 0, answer, 0, 0+new_d);
+		s_matrix_add(new_d, five, two, 0, 0, 0, 0, answer, 0, 0+new_d);
 		
 		// CE + DG ... bottom left
-		s_matrix_add(new_d, three, four, 0, 0, 0, 0, answer, 0+new_d, 0);
+		s_matrix_add(new_d, six, four, 0, 0, 0, 0, answer, 0+new_d, 0);
 
-		freeMatrix(one, new_d);
+
 		freeMatrix(two, new_d);
-		freeMatrix(three, new_d);
 		freeMatrix(four, new_d);
 		freeMatrix(five, new_d);
 		freeMatrix(six, new_d);
-		freeMatrix(seven, new_d);
+
+		freeMatrix(sub_a, new_d);
+		freeMatrix(sub_b, new_d);
 	}
 }
 
 int main(int argc, char *argv[]){
-#warning Segfault is occurring for 1024 x 1024 matrices. Must be fixed.
-
 	if(argc < 4){
 		printf("Not enough arguments!\n");
 		return 1;
@@ -251,7 +269,6 @@ int main(int argc, char *argv[]){
 		}
 		int** a = allocateMatrix(x); //first input matrix
 		int** b = allocateMatrix(x); //second input matrix
-
 		
 		printf("Enter the values of the first matrix:\n");
 		for (int i=0; i<d; i++){
@@ -301,6 +318,69 @@ int main(int argc, char *argv[]){
 
 		#warning Do we need to free things here at the end?
 		return 0;
+	}
+
+	// If flag is 2, for our own testing of correctness from inputted matrix from file
+	if(atoi(argv[1])==2){
+		int d = atoi(argv[2]);
+		int x = nextPowofTwo(d);
+
+		// Save the filename
+		const char* filename = argv[3];
+
+		int** a = allocateMatrix(x); //first input matrix
+		int** b = allocateMatrix(x); //second input matrix
+		
+		int** s_c = allocateMatrix(x); //strassen result matrix
+
+		int** c = allocateMatrix(x); //standard result matrix
+
+		int** f = allocateMatrix(x); //difference of results matrix
+
+
+		FILE* file = fopen(filename, "r");
+
+		//To fill up matrices from text file
+		int i = 0;
+		int j = 0;
+		bool first_matrix = true;
+		int number;
+		while(fscanf(file, "%d" , &number) > 0) {
+			if(first_matrix){
+				a[i][j]=number;
+				j++;
+				if(j==d){
+					j=0;
+					i++;
+					if(i==d){
+						first_matrix = false;
+						i = 0;
+					}
+				}
+			}
+			else{
+				if(j==d){
+					j=0;
+					i+=1;
+				}
+				if(i==d){
+					i=0;
+				}
+				b[i][j]=number;
+				j++;
+			}
+		}
+		fclose(file);
+
+		strassen(x, a, b, 0, 0, 0, 0, s_c);
+		standard_mult(x, a, b, c);
+
+		printf("The diagonal of strassen:\n");
+		display_diagonal(d, s_c);
+
+		matrix_subtract(d,c,s_c,f);
+		printf("The difference of the two matrices should be all 0s:\n");
+		display_mat(d,f);
 	}
 
 	// If flag is 0, as per pset specs, returns just the diagonal result.
