@@ -45,10 +45,11 @@ int nextPowofTwo(int d){
 }
 
 // Standard matrix multiplication
-#warning Optimize (or confirm that it is) by re-ordering the loops to take advantage of caching
+#warning Optimize (or confirm that it is) by re-ordering the loops to take advantage of caching... same with other helper functions
 void standard_mult(int d, int** a, int** b, int** answer){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
+			#warning Is this necessary? Will the answer matrix already be 0?
 			answer[i][j] = 0;
 			for (int k=0; k<d; k++){
 				answer[i][j] += a[i][k]*b[k][j];
@@ -372,6 +373,60 @@ int main(int argc, char *argv[]){
 		matrix_subtract(d,c,s_c,f);
 		printf("The difference of the two matrices should be all 0s:\n");
 		display_mat(d,f);
+	}
+
+	// If flag is 3, for our own testing, just standard multiplication
+	if(atoi(argv[1])==3){
+		int d = atoi(argv[2]);
+		int x = nextPowofTwo(d);
+
+		// Save the filename
+		const char* filename = argv[3];
+
+		int** a = allocateMatrix(x); //first input matrix
+		int** b = allocateMatrix(x); //second input matrix
+		
+		int** c = allocateMatrix(x); //standard result matrix
+
+
+		FILE* file = fopen(filename, "r");
+
+		//To fill up matrices from text file
+		int i = 0;
+		int j = 0;
+		bool first_matrix = true;
+		int number;
+		while(fscanf(file, "%d" , &number) > 0) {
+			if(first_matrix){
+				a[i][j]=number;
+				j++;
+				if(j==d){
+					j=0;
+					i++;
+					if(i==d){
+						first_matrix = false;
+						i = 0;
+					}
+				}
+			}
+			else{
+				if(j==d){
+					j=0;
+					i+=1;
+				}
+				if(i==d){
+					i=0;
+				}
+				b[i][j]=number;
+				j++;
+			}
+		}
+		fclose(file);
+
+		standard_mult(x, a, b, c);
+
+		printf("The diagonal of standard:\n");
+		display_diagonal(d, c);
 	}
 
 	// If flag is 0, as per pset specs, returns just the diagonal result.
