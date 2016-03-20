@@ -194,7 +194,6 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		freeMatrix(sub_b, new_d);
 
 		//Calculating the four sub matrices
-
 		// AE + BG ... top left
 		s_matrix_add(new_d, five, four, 0, 0, 0, 0, answer, 0+new_d, 0);
 		s_matrix_subtract(new_d, answer, two, 0+new_d, 0, 0, 0, answer, 0+new_d, 0+new_d);
@@ -218,32 +217,6 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		freeMatrix(five, new_d);
 		freeMatrix(six, new_d);
 		freeMatrix(seven, new_d);
-
-		/*
-		*** Code for debugging. Can delete later! ***
-
-		printf("One:\n");
-		display_mat(new_d, one);
-
-		printf("Two:\n");
-		display_mat(new_d, two);
-
-		printf("Three:\n");
-		display_mat(new_d, three);
-
-		printf("Four:\n");
-		display_mat(new_d, four);
-
-		printf("Five:\n");
-		display_mat(new_d, five);
-
-		printf("Six:\n");
-		display_mat(new_d, six);
-
-		printf("Seven:\n");
-		display_mat(new_d, seven);
-		*/
-
 	}
 }
 
