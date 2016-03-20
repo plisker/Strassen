@@ -136,23 +136,21 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		int** sub_b = allocateMatrix(new_d);
 
 
-
+		/* Calculate P_2 */
 		// A + B
 		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS, a_CS+new_d, sub_b, 0, 0);
 		
 		// P_2
 		strassen(new_d, sub_b, matrix2, 0, 0, b_RS+new_d, b_CS+new_d, two);
 
-
-
+		/* Calculate P_4 */
 		// G - E
 		s_matrix_subtract(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS, b_CS, sub_a, 0, 0);
 		
 		// P_4
 		strassen(new_d, matrix1, sub_a, a_RS+new_d, a_CS+new_d, 0, 0, four);
 
-
-
+		/* Calculate P_5 */
 		// A + D
 		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS+new_d, sub_a, 0, 0);
 		
@@ -162,8 +160,7 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		// P_5
 		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, five);
 
-		
-
+		/* Calculate P_6 */
 		// B - D
 		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS+new_d, a_RS+new_d, a_CS+new_d, sub_a, 0, 0);
 		
@@ -173,14 +170,12 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		// P_6
 		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, six);
 
-
-		// AE + BG ... top left
+		/* AE + BG ... top left */
 		s_matrix_add(new_d, five, four, 0, 0, 0, 0, answer, 0+new_d, 0);
 		s_matrix_subtract(new_d, answer, two, 0+new_d, 0, 0, 0, answer, 0+new_d, 0+new_d);
 		s_matrix_add(new_d, answer, six, 0+new_d, 0+new_d, 0, 0, answer, 0, 0);
 
-
-		//Repurpose Six as Seven
+		/* Calculate P_7, repurposing Six as Seven */
 		// A - C
 		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS, sub_a, 0, 0);
 		
@@ -191,11 +186,11 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, six/*now Seven*/);
 
 
-		// CF + DH ... bottom right... begin
+		/* CF + DH ... bottom right ... BEGIN */
 		s_matrix_subtract(new_d, five, six/*now Seven*/, 0, 0, 0, 0, answer, 0+new_d, 0);
 
 
-		//Repurpose Seven (formerly Six) as Three
+		/* Calculate P_3, repurposing Seven (formerly Six) as Three */
 		// C + D
 		s_matrix_add(new_d, matrix1, matrix1, a_RS+new_d, a_CS, a_RS+new_d, a_CS+new_d, sub_a, 0,0);
 		
@@ -203,12 +198,10 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		strassen(new_d, sub_a, matrix2, 0, 0, b_RS, b_CS, six/*now Three*/);
 
 
-
-		// CF + DH ... bottom right... continue
+		/* CF + DH ... bottom right ... CONTINUE */
 		s_matrix_subtract(new_d, answer, six, 0+new_d, 0, 0, 0, answer, 0, 0+new_d);
 
-
-		// Repurpose Five as One
+		/* Calculate P_1, repurposing Five as One */
 		// F - H
 		s_matrix_subtract(new_d, matrix2, matrix2, b_RS, b_CS+new_d, b_RS+new_d, b_CS+new_d, sub_a, 0, 0);
 		
@@ -216,15 +209,15 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		strassen(new_d, matrix1, sub_a, a_RS, a_CS, 0, 0, five/*now One*/);
 
 
-		// CF + DH ... bottom right... end
+		/* CF + DH ... bottom right ... END*/
 		s_matrix_add(new_d, answer, five/*now One*/, 0, 0+new_d, 0, 0, answer, 0+new_d, 0+new_d);
 
 
 		//Calculating the other two sub matrices
-		// AF + BH ... top right
+		/* AF + BH ... top right */
 		s_matrix_add(new_d, five/*now One*/, two, 0, 0, 0, 0, answer, 0, 0+new_d);
 		
-		// CE + DG ... bottom left
+		/* CE + DG ... bottom left */
 		s_matrix_add(new_d, six/*now Three*/, four, 0, 0, 0, 0, answer, 0+new_d, 0);
 
 
