@@ -14,7 +14,7 @@ int** allocateMatrix(int d) {
     for (int i = 0; i < d; i++){
         matrix[i] = (int*) malloc(d*sizeof(int)); //allocate enough space for d columns of ints
         
-        #warning This is probaby inefficient, especially since the function is used for malloc'ing several different matrices
+        #warning Probaby inefficient and unnecessary for some malloc'ed matrices. Split into two functions?
         for (int j=0;j<d;j++){
     		matrix[i][j]=0; //solves padding 0 problem for non-powers of 2
     	}
@@ -45,7 +45,7 @@ int nextPowofTwo(int d){
 }
 
 // Standard matrix multiplication
-#warning Optimize (or confirm that it is) by re-ordering the loops to take advantage of caching... same with other helper functions
+#warning Optimize (or confirm that it is) by re-ordering  loops to take advantage of caching... Same with other helper functions.
 void standard_mult(int d, int** a, int** b, int** answer){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
@@ -53,6 +53,22 @@ void standard_mult(int d, int** a, int** b, int** answer){
 			answer[i][j] = 0;
 			for (int k=0; k<d; k++){
 				answer[i][j] += a[i][k]*b[k][j];
+			}
+		}
+	}
+}
+
+// Strassen add, tracking indexes
+// RS = row start
+// CS = column start
+#warning Optimize (or confirm that it is) by re-ordering  loops to take advantage of caching... Same with other helper functions.
+void s_standard_mult(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, int b_CS, int** answer){
+	for (int i=0; i<d; i++){
+		for (int j=0; j<d; j++){
+			#warning Is this necessary? Will the answer matrix already be 0?
+			answer[i][j] = 0;
+			for (int k=0; k<d; k++){
+				answer[i][j] += a[i+a_RS][k+a_CS]*b[k+b_RS][j+b_CS];
 			}
 		}
 	}
@@ -121,13 +137,13 @@ void matrix_subtract(int d, int** a, int** b, int** answer){
 void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS, int b_CS, int** answer){
 	#warning Eventually this should be "if d < CROSSOVER"
 	if(d==1){
-		answer[0][0] = matrix1[a_RS][a_CS] * matrix2[b_RS][b_CS];
+		s_standard_mult(d, matrix1, matrix2, a_RS, a_CS, b_RS, b_CS, answer);
 	}
 	else{
-
 		int new_d = d/2;
 
 		#warning Are these too many allocations?
+		// Paul thinks that there can't be any fewer anymore, fully optimized.
 		int** two = allocateMatrix(new_d);
 		int** four = allocateMatrix(new_d);
 		int** five = allocateMatrix(new_d);
@@ -308,7 +324,6 @@ int main(int argc, char *argv[]){
 		printf("The difference of the two matrices should be all 0s:\n");
 		display_mat(d,f);
 
-		#warning Do we need to free things here at the end?
 		return 0;
 	}
 
