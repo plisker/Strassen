@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
+#include <time.h>
 
 void strassen(int, int**, int**, int, int, int, int, int**);
 
@@ -42,6 +43,18 @@ int nextPowofTwo(int d){
 	double n = ceil(log2(((double) d)));
 	int x = (int) pow((double) 2, n);
 	return x;
+}
+
+//Checks if number is even
+int isEven(int d){
+	return (d%2==0);
+}
+
+int nextEven(int d){
+	if(isEven(d))
+		return d;
+	else
+		return (d+1);
 }
 
 // Standard matrix multiplication
@@ -248,6 +261,14 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 	}
 }
 
+// void t_strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS, int b_CS, int** answer){
+// 	#warning Eventually this should be "if d < CROSSOVER"
+// 	if(d==1){
+// 		s_standard_mult(d, matrix1, matrix2, a_RS, a_CS, b_RS, b_CS, answer);
+// 	}
+// 	else{
+// 		if()
+
 int main(int argc, char *argv[]){
 	if(argc < 4){
 		printf("Not enough arguments!\n");
@@ -257,7 +278,7 @@ int main(int argc, char *argv[]){
 		printf("Too many arguments!\n");
 		return 2;
 	}
-
+	clock_t start, elapsed, start_s, elapsed_s;
 	// If flag is 1, for our own testing
 	if(atoi(argv[1])==1){
 		int d;
@@ -304,10 +325,9 @@ int main(int argc, char *argv[]){
 		//Standard multiplication
 		int** c = allocateMatrix(d); //standard result matrix
 		standard_mult(d,a,b,c);
-		
 		//Strassen multiplication
 		int** s_c = allocateMatrix(x); //strassen result matrix
-		strassen(x, a, b, 0, 0, 0, 0, s_c);	
+		strassen(x, a, b, 0, 0, 0, 0, s_c);
 
 		printf("The final output (diagonal of product matrix) from the specs should be this:\n");
 		display_diagonal(d, s_c);
@@ -378,9 +398,12 @@ int main(int argc, char *argv[]){
 			}
 		}
 		fclose(file);
-
+		start = clock();
 		strassen(x, a, b, 0, 0, 0, 0, s_c);
+		elapsed = clock() - start;
+		start_s = clock();
 		standard_mult(x, a, b, c);
+		elapsed_s = clock() - start_s;
 
 		printf("The diagonal of strassen:\n");
 		display_diagonal(d, s_c);
@@ -388,6 +411,12 @@ int main(int argc, char *argv[]){
 		matrix_subtract(d,c,s_c,f);
 		printf("The difference of the two matrices should be all 0s:\n");
 		display_mat(d,f);
+		printf("Standard takes %d\n",1000*elapsed/CLOCKS_PER_SEC);
+		printf("Strassen takes %d\n",1000*elapsed_s/CLOCKS_PER_SEC);
+		//int msec = elapsed * 1000 / CLOCKS_PER_SEC;
+		//printf("Standard algo takes %d seconds %d milliseconds\n", msec/1000, msec%1000);
+		//int msec_s = elapsed_s * 1000 / CLOCKS_PER_SEC;
+		//printf("Strassen algo takes %d seconds %d milliseconds", msec_s/1000, msec_s%1000);
 	}
 
 	// If flag is 3, for our own testing, just standard multiplication
@@ -442,6 +471,26 @@ int main(int argc, char *argv[]){
 
 		printf("The diagonal of standard:\n");
 		display_diagonal(d, c);
+	}
+
+	// If flag is 4, for our own testing, Curren test
+	if(atoi(argv[1])==4){
+		int d;
+		printf("Enter the dimension of square matrices to be multiplied:\n");
+		scanf("%i",&d);
+		int x = nextEven(d); //2^ceil(log_2(d))
+
+		//Check if input integer is a power of 2
+		if(isEven(d)==1){
+			//Allocate memory to fit size d matrix - powers of 2
+			printf("This is an even number\n");
+		}
+		else{
+			//Allocate memory to fit size x matrix - non-powers of 2
+			printf("This is not an even number\n");
+			printf("Next even number is %d\n",x);
+		}
+
 	}
 
 	// If flag is 0, as per pset specs, returns just the diagonal result.
