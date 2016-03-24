@@ -191,9 +191,9 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 	else{
 		int new_d = d/2;
 		
-		int** one = allocateMatrix_set_zero(new_d);
-		int** two = allocateMatrix_set_zero(new_d);
-		int** three = allocateMatrix_set_zero(new_d);
+		int** one = allocateMatrix(new_d);
+		int** two = allocateMatrix(new_d);
+		int** three = allocateMatrix(new_d);
 
 		/*************/
 
@@ -454,6 +454,7 @@ int main(int argc, char *argv[]){
 		matrix_subtract(d,c,s_c,f);
 		bool worked = true;
 
+		// Checks to see whether Strassen and Standard are equal
 		for (int i=0; i<d; i++){
 			for (int j=0; j<d; j++){
 				if(f[i][j]!=0){
@@ -472,10 +473,10 @@ int main(int argc, char *argv[]){
 
 		printf("\nDid it work?\n");
 		if(worked==true){
-			printf("Yes!\n\n");
+			printf("Yes! :)\n\n");
 		}
 		else{
-			printf("No :(\n");
+			printf("No... :(\n");
 		}
 		printf("Standard takes %d\n",1000*elapsed/CLOCKS_PER_SEC);
 		printf("Strassen takes %d\n",1000*elapsed_s/CLOCKS_PER_SEC);
