@@ -13,9 +13,7 @@ int** allocateMatrix_set_zero(int d) {
     int** matrix;
     matrix = (int**) malloc(d*sizeof(int*)); //allocate space for d rows of ints
     for (int i = 0; i < d; i++){
-        matrix[i] = (int*) malloc(d*sizeof(int)); //allocate enough space for d columns of ints
-        
-        #warning Probaby inefficient and unnecessary for some malloc'ed matrices. Split into two functions?
+        matrix[i] = (int*) malloc(d*sizeof(int)); //allocate enough space for d columns of ints        
         for (int j=0;j<d;j++){
     		matrix[i][j]=0; //solves padding 0 problem for non-powers of 2
     	}
@@ -72,8 +70,6 @@ int nextEven(int d){
 void standard_mult(int d, int** a, int** b, int** answer){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
-			#warning Is this necessary? Will the answer matrix already be 0?
-			answer[i][j] = 0;
 			for (int k=0; k<d; k++){
 				answer[i][j] += a[i][k]*b[k][j];
 			}
@@ -84,11 +80,9 @@ void standard_mult(int d, int** a, int** b, int** answer){
 // Strassen add, tracking indexes
 // RS = row start
 // CS = column start
-#warning Optimize (or confirm that it is) by re-ordering  loops to take advantage of caching... Same with other helper functions.
 void s_standard_mult(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, int b_CS, int** answer){
 	for (int i=0; i<d; i++){
 		for (int j=0; j<d; j++){
-			#warning Is this necessary? Will the answer matrix already be 0?
 			answer[i][j] = 0;
 			for (int k=0; k<d; k++){
 				answer[i][j] += a[i+a_RS][k+a_CS]*b[k+b_RS][j+b_CS];
@@ -477,8 +471,8 @@ int main(int argc, char *argv[]){
 		else{
 			printf("No... :(\n");
 		}
-		printf("Standard takes %d\n",1000*elapsed/CLOCKS_PER_SEC);
-		printf("Strassen takes %d\n",1000*elapsed_s/CLOCKS_PER_SEC);
+		printf("Standard takes %d\n",(int)(1000*elapsed/CLOCKS_PER_SEC));
+		printf("Strassen takes %d\n",(int)(1000*elapsed_s/CLOCKS_PER_SEC));
 		//int msec = elapsed * 1000 / CLOCKS_PER_SEC;
 		//printf("Standard algo takes %d seconds %d milliseconds\n", msec/1000, msec%1000);
 		//int msec_s = elapsed_s * 1000 / CLOCKS_PER_SEC;
