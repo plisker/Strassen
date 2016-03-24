@@ -8,8 +8,8 @@
 
 void strassen(int, int**, int**, int, int, int, int, int**);
 
-// Allocates memory for a square matrix of size d x d using double pointers...
-int** allocateMatrix(int d) {
+// Allocates memory for a square matrix of size d x d using double pointers and sets to all 0s...
+int** allocateMatrix_set_zero(int d) {
     int** matrix;
     matrix = (int**) malloc(d*sizeof(int*)); //allocate space for d rows of ints
     for (int i = 0; i < d; i++){
@@ -19,6 +19,16 @@ int** allocateMatrix(int d) {
         for (int j=0;j<d;j++){
     		matrix[i][j]=0; //solves padding 0 problem for non-powers of 2
     	}
+    }
+    return matrix;
+}
+
+// Allocates memory for a square matrix of size d x d using double pointers...
+int** allocateMatrix(int d) {
+    int** matrix;
+    matrix = (int**) malloc(d*sizeof(int*)); //allocate space for d rows of ints
+    for (int i = 0; i < d; i++){
+        matrix[i] = (int*) malloc(d*sizeof(int)); //allocate enough space for d columns of ints
     }
     return matrix;
 }
@@ -296,8 +306,8 @@ int main(int argc, char *argv[]){
 			printf("This is not a power of two\n");
 			printf("Next power of two is %d\n",x);
 		}
-		int** a = allocateMatrix(x); //first input matrix
-		int** b = allocateMatrix(x); //second input matrix
+		int** a = allocateMatrix_set_zero(x); //first input matrix
+		int** b = allocateMatrix_set_zero(x); //second input matrix
 		
 		printf("Enter the values of the first matrix:\n");
 		for (int i=0; i<d; i++){
@@ -323,10 +333,10 @@ int main(int argc, char *argv[]){
 
 
 		//Standard multiplication
-		int** c = allocateMatrix(d); //standard result matrix
+		int** c = allocateMatrix_set_zero(d); //standard result matrix
 		standard_mult(d,a,b,c);
 		//Strassen multiplication
-		int** s_c = allocateMatrix(x); //strassen result matrix
+		int** s_c = allocateMatrix_set_zero(x); //strassen result matrix
 		strassen(x, a, b, 0, 0, 0, 0, s_c);
 
 		printf("The final output (diagonal of product matrix) from the specs should be this:\n");
@@ -339,7 +349,7 @@ int main(int argc, char *argv[]){
 		display_mat(d,s_c);
 
 		//Subtraction of Standard and Strassen... to check if they're the same
-		int** f = allocateMatrix(d);
+		int** f = allocateMatrix_set_zero(d);
 		matrix_subtract(d,c,s_c,f);
 		printf("The difference of the two matrices should be all 0s:\n");
 		display_mat(d,f);
@@ -355,14 +365,14 @@ int main(int argc, char *argv[]){
 		// Save the filename
 		const char* filename = argv[3];
 
-		int** a = allocateMatrix(x); //first input matrix
-		int** b = allocateMatrix(x); //second input matrix
+		int** a = allocateMatrix_set_zero(x); //first input matrix
+		int** b = allocateMatrix_set_zero(x); //second input matrix
 		
-		int** s_c = allocateMatrix(x); //strassen result matrix
+		int** s_c = allocateMatrix_set_zero(x); //strassen result matrix
 
-		int** c = allocateMatrix(x); //standard result matrix
+		int** c = allocateMatrix_set_zero(x); //standard result matrix
 
-		int** f = allocateMatrix(x); //difference of results matrix
+		int** f = allocateMatrix_set_zero(x); //difference of results matrix
 
 
 		FILE* file = fopen(filename, "r");
@@ -409,8 +419,26 @@ int main(int argc, char *argv[]){
 		display_diagonal(d, s_c);
 
 		matrix_subtract(d,c,s_c,f);
-		printf("The difference of the two matrices should be all 0s:\n");
-		display_mat(d,f);
+		bool worked = true;
+
+		for (int i=0; i<d; i++){
+			for (int j=0; j<d; j++){
+				if(f[i][j]!=0){
+					worked = false;
+				}
+			}
+		}
+
+
+
+
+		printf("\nDid it work?\n");
+		if(worked==true){
+			printf("Yes!\n\n");
+		}
+		else{
+			printf("No :(\n");
+		}
 		printf("Standard takes %d\n",1000*elapsed/CLOCKS_PER_SEC);
 		printf("Strassen takes %d\n",1000*elapsed_s/CLOCKS_PER_SEC);
 		//int msec = elapsed * 1000 / CLOCKS_PER_SEC;
@@ -427,10 +455,10 @@ int main(int argc, char *argv[]){
 		// Save the filename
 		const char* filename = argv[3];
 
-		int** a = allocateMatrix(x); //first input matrix
-		int** b = allocateMatrix(x); //second input matrix
+		int** a = allocateMatrix_set_zero(x); //first input matrix
+		int** b = allocateMatrix_set_zero(x); //second input matrix
 		
-		int** c = allocateMatrix(x); //standard result matrix
+		int** c = allocateMatrix_set_zero(x); //standard result matrix
 
 
 		FILE* file = fopen(filename, "r");
@@ -501,10 +529,10 @@ int main(int argc, char *argv[]){
 		// Save the filename
 		const char* filename = argv[3];
 
-		int** a = allocateMatrix(x); //first input matrix
-		int** b = allocateMatrix(x); //second input matrix
+		int** a = allocateMatrix_set_zero(x); //first input matrix
+		int** b = allocateMatrix_set_zero(x); //second input matrix
 		
-		int** s_c = allocateMatrix(x); //result matrix
+		int** s_c = allocateMatrix_set_zero(x); //result matrix
 		
 		FILE* file = fopen(filename, "r");
 
