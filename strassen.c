@@ -225,7 +225,6 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 		/* AF + BH ... top right */
 		initialize_values(new_d, two, 0, 0, answer, 0, 0+new_d);
 
-
 		/*************/
 
 		/* Calculate P_5 */
