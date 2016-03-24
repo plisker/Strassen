@@ -126,6 +126,14 @@ void s_matrix_add(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, int b_C
 	}
 }
 
+void s_matrix_add_to(int d, int** a, int a_RS, int a_CS, int** answer, int c_RS, int c_CS){
+	for (int i=0; i<d; i++){
+		for (int j=0; j<d; j++){
+			answer[i+c_RS][j+c_CS] += a[i+a_RS][j+a_CS];
+		}
+	}
+}
+
 // Full add, no indexes tracked
 void matrix_add(int d, int** a, int** b, int** answer){
 	for (int i=0; i<d; i++){
@@ -146,6 +154,22 @@ void s_matrix_subtract(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, in
 	}
 }
 
+void s_matrix_subtract_to(int d, int** a, int a_RS, int a_CS, int** answer, int c_RS, int c_CS){
+	for (int i=0; i<d; i++){
+		for (int j=0; j<d; j++){
+			answer[i+c_RS][j+c_CS] -= a[i+a_RS][j+a_CS];
+		}
+	}
+}
+
+void initialize_values(int d, int** a, int a_RS, int a_CS, int** answer, int c_RS, int c_CS){
+	for (int i=0; i<d; i++){
+		for (int j=0; j<d; j++){
+			answer[i+c_RS][j+c_CS] = a[i+a_RS][j+a_CS];
+		}
+	}
+}
+
 // Full subtract, no indexes tracked
 void matrix_subtract(int d, int** a, int** b, int** answer){
 	for (int i=0; i<d; i++){
@@ -155,129 +179,138 @@ void matrix_subtract(int d, int** a, int** b, int** answer){
 	}
 }
 
+
 // RS = row start
 // CS = column start
+
 void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS, int b_CS, int** answer){
 	#warning Eventually this should be "if d < CROSSOVER"
-	if(d==1){
+	if(d<=64){
 		s_standard_mult(d, matrix1, matrix2, a_RS, a_CS, b_RS, b_CS, answer);
 	}
 	else{
 		int new_d = d/2;
-
-		#warning Are these too many allocations?
-		// Paul thinks that there can't be any fewer anymore, fully optimized.
-		int** two = allocateMatrix(new_d);
-		int** four = allocateMatrix(new_d);
-		int** five = allocateMatrix(new_d);
-		int** six = allocateMatrix(new_d);
-
-		int** sub_a = allocateMatrix(new_d);
-		int** sub_b = allocateMatrix(new_d);
-
-
-		/* Calculate P_2 */
-		// A + B
-		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS, a_CS+new_d, sub_b, 0, 0);
 		
-		// P_2
-		strassen(new_d, sub_b, matrix2, 0, 0, b_RS+new_d, b_CS+new_d, two);
+		int** one = allocateMatrix_set_zero(new_d);
+		int** two = allocateMatrix_set_zero(new_d);
+		int** three = allocateMatrix_set_zero(new_d);
+
+		/*************/
 
 		/* Calculate P_4 */
 		// G - E
-		s_matrix_subtract(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS, b_CS, sub_a, 0, 0);
+		s_matrix_subtract(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS, b_CS, one, 0, 0);
 		
 		// P_4
-		strassen(new_d, matrix1, sub_a, a_RS+new_d, a_CS+new_d, 0, 0, four);
+		strassen(new_d, matrix1, one, a_RS+new_d, a_CS+new_d, 0, 0, two);
+
+		/* AE + BG ... top left */
+		initialize_values(new_d, two, 0, 0, answer, 0, 0);
+
+		/* CE + DG ... bottom left */
+		initialize_values(new_d, two, 0, 0, answer, 0+new_d, 0);
+
+		/*************/
+
+		/* Calculate P_2 */
+		// A + B
+		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS, a_CS+new_d, one, 0, 0);
+		
+		// P_2
+		strassen(new_d, one, matrix2, 0, 0, b_RS+new_d, b_CS+new_d, two);
+
+		/* AE + BG ... top left */
+		s_matrix_subtract_to(new_d, two, 0, 0, answer, 0, 0);
+
+		/* AF + BH ... top right */
+		initialize_values(new_d, two, 0, 0, answer, 0, 0+new_d);
+
+
+		/*************/
 
 		/* Calculate P_5 */
 		// A + D
-		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS+new_d, sub_a, 0, 0);
+		s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS+new_d, one, 0, 0);
 		
 		// E + H
-		s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS+new_d, b_CS+new_d, sub_b, 0, 0);
+		s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS+new_d, b_CS+new_d, two, 0, 0);
 
 		// P_5
-		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, five);
+		strassen(new_d, one, two, 0, 0, 0, 0, three);
+
+		/* AE + BG ... top left */
+		s_matrix_add_to(new_d, three, 0, 0, answer, 0, 0);
+
+		/* CF + DH ... bottom right */
+		initialize_values(new_d, three, 0, 0, answer, 0+new_d, 0+new_d);
+
+		/*************/
 
 		/* Calculate P_6 */
 		// B - D
-		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS+new_d, a_RS+new_d, a_CS+new_d, sub_a, 0, 0);
+		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS+new_d, a_RS+new_d, a_CS+new_d, one, 0, 0);
 		
 		// G + H
-		s_matrix_add(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS+new_d, b_CS+new_d, sub_b, 0, 0);
+		s_matrix_add(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS+new_d, b_CS+new_d, two, 0, 0);
 
 		// P_6
-		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, six);
+		strassen(new_d, one, two, 0, 0, 0, 0, three);
 
 		/* AE + BG ... top left */
-		s_matrix_add(new_d, five, four, 0, 0, 0, 0, answer, 0+new_d, 0);
-		s_matrix_subtract(new_d, answer, two, 0+new_d, 0, 0, 0, answer, 0+new_d, 0+new_d);
-		s_matrix_add(new_d, answer, six, 0+new_d, 0+new_d, 0, 0, answer, 0, 0);
+		s_matrix_add_to(new_d, three, 0, 0, answer, 0, 0);
 
-		/* Calculate P_7, repurposing Six as Seven */
+		/*************/
+
+		/* Calculate P_7 */
 		// A - C
-		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS, sub_a, 0, 0);
+		s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS, one, 0, 0);
 		
 		// E + F
-		s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS, b_CS+new_d, sub_b, 0, 0);
+		s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS, b_CS+new_d, two, 0, 0);
 
 		// P_7
-		strassen(new_d, sub_a, sub_b, 0, 0, 0, 0, six/*now Seven*/);
+		strassen(new_d, one, two, 0, 0, 0, 0, three);
 
+		/* CF + DH ... bottom right */
+		s_matrix_subtract_to(new_d, three, 0, 0, answer, 0+new_d, 0+new_d);
 
-		/* CF + DH ... bottom right ... BEGIN */
-		s_matrix_subtract(new_d, five, six/*now Seven*/, 0, 0, 0, 0, answer, 0+new_d, 0);
+		/*************/
 
-
-		/* Calculate P_3, repurposing Seven (formerly Six) as Three */
+		/* Calculate P_3 */
 		// C + D
-		s_matrix_add(new_d, matrix1, matrix1, a_RS+new_d, a_CS, a_RS+new_d, a_CS+new_d, sub_a, 0,0);
+		s_matrix_add(new_d, matrix1, matrix1, a_RS+new_d, a_CS, a_RS+new_d, a_CS+new_d, one, 0,0);
 		
 		// P_3
-		strassen(new_d, sub_a, matrix2, 0, 0, b_RS, b_CS, six/*now Three*/);
+		strassen(new_d, one, matrix2, 0, 0, b_RS, b_CS, two);
 
+		/* CF + DH ... bottom right */
+		s_matrix_subtract_to(new_d, two, 0, 0, answer, 0+new_d, 0+new_d);
 
-		/* CF + DH ... bottom right ... CONTINUE */
-		s_matrix_subtract(new_d, answer, six, 0+new_d, 0, 0, 0, answer, 0, 0+new_d);
+		/* CE + DG ... bottom left */
+		s_matrix_add_to(new_d, two, 0, 0, answer, 0+new_d, 0);
 
-		/* Calculate P_1, repurposing Five as One */
+		/*************/
+
+		/* Calculate P_1 */
 		// F - H
-		s_matrix_subtract(new_d, matrix2, matrix2, b_RS, b_CS+new_d, b_RS+new_d, b_CS+new_d, sub_a, 0, 0);
+		s_matrix_subtract(new_d, matrix2, matrix2, b_RS, b_CS+new_d, b_RS+new_d, b_CS+new_d, one, 0, 0);
 		
 		// P_1
-		strassen(new_d, matrix1, sub_a, a_RS, a_CS, 0, 0, five/*now One*/);
+		strassen(new_d, matrix1, one, a_RS, a_CS, 0, 0, two);
 
-
-		/* CF + DH ... bottom right ... END*/
-		s_matrix_add(new_d, answer, five/*now One*/, 0, 0+new_d, 0, 0, answer, 0+new_d, 0+new_d);
-
-
-		//Calculating the other two sub matrices
 		/* AF + BH ... top right */
-		s_matrix_add(new_d, five/*now One*/, two, 0, 0, 0, 0, answer, 0, 0+new_d);
-		
-		/* CE + DG ... bottom left */
-		s_matrix_add(new_d, six/*now Three*/, four, 0, 0, 0, 0, answer, 0+new_d, 0);
+		s_matrix_add_to(new_d, two, 0, 0, answer, 0, 0+new_d);
 
+		/* CF + DH ... bottom right */
+		s_matrix_add_to(new_d, two, 0, 0, answer, 0+new_d, 0+new_d);
 
+		/*************/
+
+		freeMatrix(one, new_d);
 		freeMatrix(two, new_d);
-		freeMatrix(four, new_d);
-		freeMatrix(five, new_d);
-		freeMatrix(six, new_d);
-
-		freeMatrix(sub_a, new_d);
-		freeMatrix(sub_b, new_d);
+		freeMatrix(three, new_d);
 	}
 }
-
-// void t_strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS, int b_CS, int** answer){
-// 	#warning Eventually this should be "if d < CROSSOVER"
-// 	if(d==1){
-// 		s_standard_mult(d, matrix1, matrix2, a_RS, a_CS, b_RS, b_CS, answer);
-// 	}
-// 	else{
-// 		if()
 
 int main(int argc, char *argv[]){
 	if(argc < 4){
@@ -429,8 +462,13 @@ int main(int argc, char *argv[]){
 			}
 		}
 
+		/*
+		printf("Standard\n");
+		display_mat(d,c);
 
-
+		printf("Strassen\n");
+		display_mat(d,s_c);
+		*/
 
 		printf("\nDid it work?\n");
 		if(worked==true){
@@ -444,7 +482,7 @@ int main(int argc, char *argv[]){
 		//int msec = elapsed * 1000 / CLOCKS_PER_SEC;
 		//printf("Standard algo takes %d seconds %d milliseconds\n", msec/1000, msec%1000);
 		//int msec_s = elapsed_s * 1000 / CLOCKS_PER_SEC;
-		//printf("Strassen algo takes %d seconds %d milliseconds", msec_s/1000, msec_s%1000);
+		//printf("Strassen algo takes %d seconds %d milliseconds", msec_s/1000, msec_s%1000)
 	}
 
 	// If flag is 3, for our own testing, just standard multiplication
