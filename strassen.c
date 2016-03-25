@@ -39,6 +39,27 @@ void freeMatrix(int** m, int d){
 	return;
 }
 
+void padMatrix(int** m, int d){
+    d+=1;
+    m = realloc(m, d * sizeof(int *));
+    for (int i = 0; i < d; ++i){
+        if(i==d-1){
+            m[i] = (int*) malloc(d*sizeof(int));
+        }
+        else{
+            m[i] = realloc(m[i], d*sizeof(int));
+        }
+    }
+}
+
+void unPadMatrix(int** m, int d){
+    d-=1;
+    m = realloc(m, d * sizeof(int *));
+    for (int i = 0; i < d; ++i){
+        m[i] = realloc(m[i], d*sizeof(int));
+    }
+}
+
 // Checks if an integer is a power of 2
 int isPowerofTwo(int n){
 	while(((n%2)==0) && n>1)
@@ -305,6 +326,178 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
 	}
 }
 
+void strassen_p(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS, int b_CS, int** answer){
+    if(d==1){
+        s_standard_mult(d, matrix1, matrix2, a_RS, a_CS, b_RS, b_CS, answer);
+    }
+    else{
+        int d_n;
+        if(d%2==0){
+            printf("%d is an even number\n", d);
+            d_n=d;
+        }
+        else{
+            printf("%d is an odd number\n",d);
+            padMatrix(matrix1,d);
+            printf("Matrix 1 reallocated\n");
+            padMatrix(matrix2,d);
+            printf("Matrix 2 reallocated\n");
+            padMatrix(answer,d);
+            printf("Answer matrix reallocated\n");
+            d_n=d+1;
+        }
+        
+        int new_d = d_n/2;
+        
+        int** one = allocateMatrix_set_zero(new_d);
+        int** two = allocateMatrix_set_zero(new_d);
+        int** three = allocateMatrix_set_zero(new_d);
+        
+        /*************/
+        
+        /* Calculate P_4 */
+        // G - E
+//        printf("About to calculate G-E\n");
+        s_matrix_subtract(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS, b_CS, one, 0, 0);
+//        printf("G-E calculated\n");
+        
+        // P_4
+//        printf("About to calculate P4\n");
+        strassen_p(new_d, matrix1, one, a_RS+new_d, a_CS+new_d, 0, 0, two);
+//        printf("P4 calculated\n");
+        
+        /* AE + BG ... top left */
+        initialize_values(new_d, two, 0, 0, answer, 0, 0);
+        
+        /* CE + DG ... bottom left */
+        initialize_values(new_d, two, 0, 0, answer, 0+new_d, 0);
+        
+        /*************/
+        
+        /* Calculate P_2 */
+        // A + B
+        //printf("About to calculate A+B");
+        s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS, a_CS+new_d, one, 0, 0);
+        //printf("A+B calculated\n");
+        
+        // P_2
+        strassen_p(new_d, one, matrix2, 0, 0, b_RS+new_d, b_CS+new_d, two);
+        //printf("P2 calculated\n");
+        
+        /* AE + BG ... top left */
+        s_matrix_subtract_to(new_d, two, 0, 0, answer, 0, 0);
+        
+        /* AF + BH ... top right */
+        initialize_values(new_d, two, 0, 0, answer, 0, 0+new_d);
+        
+        
+        /*************/
+        
+        /* Calculate P_5 */
+        // A + D
+        printf("Matrix 1 looks like this\n");
+        display_mat(new_d, matrix1);
+        
+        s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS+new_d, one, 0, 0);
+        printf("A+D calculated\n");
+        
+        // E + H
+        s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS+new_d, b_CS+new_d, two, 0, 0);
+//        printf("E+H calculated\n");
+        
+        // P_5
+        strassen_p(new_d, one, two, 0, 0, 0, 0, three);
+//        printf("P5 calculated\n");
+        
+        /* AE + BG ... top left */
+        s_matrix_add_to(new_d, three, 0, 0, answer, 0, 0);
+        
+        /* CF + DH ... bottom right */
+        initialize_values(new_d, three, 0, 0, answer, 0+new_d, 0+new_d);
+        
+        /*************/
+        
+        /* Calculate P_6 */
+        // B - D
+        s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS+new_d, a_RS+new_d, a_CS+new_d, one, 0, 0);
+//        printf("B-D calculated\n");
+        
+        // G + H
+        s_matrix_add(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS+new_d, b_CS+new_d, two, 0, 0);
+//        printf("G+H calculated\n");
+        
+        // P_6
+        strassen_p(new_d, one, two, 0, 0, 0, 0, three);
+//        printf("P6 calculated\n");
+        
+        /* AE + BG ... top left */
+        s_matrix_add_to(new_d, three, 0, 0, answer, 0, 0);
+        
+        /*************/
+        
+        /* Calculate P_7 */
+        // A - C
+        s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS, one, 0, 0);
+//        printf("A-C calculated\n");
+        
+        // E + F
+        s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS, b_CS+new_d, two, 0, 0);
+//        printf("E+F calculated\n");
+        
+        // P_7
+        strassen_p(new_d, one, two, 0, 0, 0, 0, three);
+//        printf("P7 calculated\n");
+        
+        /* CF + DH ... bottom right */
+        s_matrix_subtract_to(new_d, three, 0, 0, answer, 0+new_d, 0+new_d);
+        
+        /*************/
+        
+        /* Calculate P_3 */
+        // C + D
+        s_matrix_add(new_d, matrix1, matrix1, a_RS+new_d, a_CS, a_RS+new_d, a_CS+new_d, one, 0,0);
+//        printf("C+D calculated\n");
+        
+        // P_3
+        strassen_p(new_d, one, matrix2, 0, 0, b_RS, b_CS, two);
+//        printf("P3 calculated\n");
+        
+        /* CF + DH ... bottom right */
+        s_matrix_subtract_to(new_d, two, 0, 0, answer, 0+new_d, 0+new_d);
+        
+        /* CE + DG ... bottom left */
+        s_matrix_add_to(new_d, two, 0, 0, answer, 0+new_d, 0);
+        
+        /*************/
+        
+        /* Calculate P_1 */
+        // F - H
+        s_matrix_subtract(new_d, matrix2, matrix2, b_RS, b_CS+new_d, b_RS+new_d, b_CS+new_d, one, 0, 0);
+//        printf("F-H calculated\n");
+        
+        // P_1
+        strassen_p(new_d, matrix1, one, a_RS, a_CS, 0, 0, two);
+//        printf("P1 calculated\n");
+        
+        /* AF + BH ... top right */
+        s_matrix_add_to(new_d, two, 0, 0, answer, 0, 0+new_d);
+        
+        /* CF + DH ... bottom right */
+        s_matrix_add_to(new_d, two, 0, 0, answer, 0+new_d, 0+new_d);
+        
+        /*************/
+        unPadMatrix(matrix1, d_n);
+        unPadMatrix(matrix2, d_n);
+        unPadMatrix(answer, d_n);
+        
+        freeMatrix(one, new_d);
+        freeMatrix(two, new_d);
+        freeMatrix(three, new_d);
+        
+    }
+}
+
+
 int main(int argc, char *argv[]){
 	if(argc < 4){
 		printf("Not enough arguments!\n");
@@ -552,6 +745,108 @@ int main(int argc, char *argv[]){
 		}
 
 	}
+
+	if(atoi(argv[1])==5){
+        int d = atoi(argv[2]);
+        //int x = nextPowofTwo(d);
+        
+        // Save the filename
+        const char* filename = argv[3];
+        
+        int** a = allocateMatrix_set_zero(d); //first input matrix
+        int** b = allocateMatrix_set_zero(d); //second input matrix
+        
+        int** s_c = allocateMatrix_set_zero(d); //strassen result matrix
+        
+        int** c = allocateMatrix_set_zero(d); //standard result matrix
+        
+        int** f = allocateMatrix_set_zero(d); //difference of results matrix
+        
+        
+        FILE* file = fopen(filename, "r");
+        
+        //To fill up matrices from text file
+        int i = 0;
+        int j = 0;
+        bool first_matrix = true;
+        int number;
+        while(fscanf(file, "%d" , &number) > 0) {
+            if(first_matrix){
+                a[i][j]=number;
+                j++;
+                if(j==d){
+                    j=0;
+                    i++;
+                    if(i==d){
+                        first_matrix = false;
+                        i = 0;
+                    }
+                }
+            }
+            else{
+                if(j==d){
+                    j=0;
+                    i+=1;
+                }
+                if(i==d){
+                    i=0;
+                }
+                b[i][j]=number;
+                j++;
+            }
+        }
+        fclose(file);
+        //printf("Matrix 1 is:\n");
+        //display_mat(d, a);
+        //printf("Matrix 2 is:\n");
+        //display_mat(d, b);
+        //start = clock();
+        strassen_p(d, a, b, 0, 0, 0, 0, s_c);
+        //elapsed = clock() - start;
+        //start_s = clock();
+        standard_mult(d, a, b, c);
+        //elapsed_s = clock() - start_s;
+        
+        printf("The diagonal of strassen:\n");
+        display_diagonal(d, s_c);
+        
+        printf("The diagonal of standard:\n");
+        display_diagonal(d, c);
+        
+        matrix_subtract(d,c,s_c,f);
+        bool worked = true;
+        
+        for (int i=0; i<d; i++){
+            for (int j=0; j<d; j++){
+                if(f[i][j]!=0){
+                    worked = false;
+                }
+            }
+        }
+        
+        /*
+         printf("Standard\n");
+         display_mat(d,c);
+         
+         printf("Strassen\n");
+         display_mat(d,s_c);
+         */
+        
+        printf("\nDid it work?\n");
+        if(worked==true){
+            printf("Yes!\n\n");
+        }
+        else{
+            printf("No :(\n");
+        }
+        //printf("Standard takes %d\n",1000*elapsed/CLOCKS_PER_SEC);
+        //printf("Strassen takes %d\n",1000*elapsed_s/CLOCKS_PER_SEC);
+        //int msec = elapsed * 1000 / CLOCKS_PER_SEC;
+        //printf("Standard algo takes %d seconds %d milliseconds\n", msec/1000, msec%1000);
+        //int msec_s = elapsed_s * 1000 / CLOCKS_PER_SEC;
+        //printf("Strassen algo takes %d seconds %d milliseconds", msec_s/1000, msec_s%1000)
+    }
+
 
 	// If flag is 0, as per pset specs, returns just the diagonal result.
 	if(atoi(argv[1])==0){
