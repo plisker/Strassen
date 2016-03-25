@@ -102,12 +102,12 @@ int nextEven(int d){
         return (d+1);
 }
 
+
 // Standard matrix multiplication
-#warning Optimize (or confirm that it is) by re-ordering  loops to take advantage of caching... Same with other helper functions.
 void standard_mult(int d, int** a, int** b, int** answer){
-    for (int i=0; i<d; i++){
-        for (int j=0; j<d; j++){
-            for (int k=0; k<d; k++){
+	for (int k=0; k<d; k++){
+	    for (int i=0; i<d; i++){
+   			for (int j=0; j<d; j++){
                 answer[i][j] += a[i][k]*b[k][j];
             }
         }
@@ -722,8 +722,13 @@ int main(int argc, char *argv[]){
         }
         fclose(file);
         
-        standard_mult(x, a, b, c);
-        
+        start_s = clock();
+        standard_mult
+        (x, a, b, c);
+        elapsed_s = clock() - start_s;
+        printf("Standard takes %d\n",(int)(1000*elapsed/CLOCKS_PER_SEC));
+
+
         printf("The diagonal of standard:\n");
         display_diagonal(d, c);
     }
@@ -748,6 +753,7 @@ int main(int argc, char *argv[]){
         
     }
     
+    // If flag is 5.... do something
     if(atoi(argv[1])==5){
         int d = atoi(argv[2]);
         //int x = nextPowofTwo(d);
@@ -953,10 +959,6 @@ int main(int argc, char *argv[]){
     if(atoi(argv[1])==0){
         int d = atoi(argv[2]);
         int x = optimalPad(d);
-        
-        printf("Original dimension: %d\n", d);
-        printf("Optimal padding: %d\n", x);
-
 
         // Save the filename
         const char* filename = argv[3];
