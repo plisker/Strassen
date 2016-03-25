@@ -127,11 +127,9 @@ void standard_mult(int d, int** a, int** b, int** answer){
 // RS = row start
 // CS = column start
 void s_standard_mult(int d, int** a, int** b, int a_RS, int a_CS, int b_RS, int b_CS, int** answer){
-    for (int k=0; k<d; k++){
-        for (int i=0; i<d; i++){
-            for (int j=0; j<d; j++){
-            answer[i][j] = 0;
-            }
+    for (int i=0; i<d; i++){
+        for (int j=0; j<d; j++){
+        answer[i][j] = 0;
         }
     }
     for (int k=0; k<d; k++){
