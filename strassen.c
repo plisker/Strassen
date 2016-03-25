@@ -18,7 +18,6 @@ void strassen(int, int**, int**, int, int, int, int, int**);
 void strassen_c(int, int**, int**, int, int, int, int, int**, int);
 
 
-
 int CROSSOVER = 32;
 
 // Allocates memory for a square matrix of size d x d using double pointers and sets to all 0s...
