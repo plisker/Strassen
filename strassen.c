@@ -15,7 +15,11 @@
 
 void strassen(int, int**, int**, int, int, int, int, int**);
 
-int CROSSOVER = 64;
+void strassen_c(int, int**, int**, int, int, int, int, int**, int);
+
+
+
+int CROSSOVER = 32;
 
 // Allocates memory for a square matrix of size d x d using double pointers and sets to all 0s...
 int** allocateMatrix_set_zero(int d) {
@@ -331,6 +335,133 @@ void strassen(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS,
         
         // P_1
         strassen(new_d, matrix1, one, a_RS, a_CS, 0, 0, two);
+        
+        /* AF + BH ... top right */
+        s_matrix_add_to(new_d, two, 0, 0, answer, 0, 0+new_d);
+        
+        /* CF + DH ... bottom right */
+        s_matrix_add_to(new_d, two, 0, 0, answer, 0+new_d, 0+new_d);
+        
+        /*************/
+        
+        freeMatrix(one, new_d);
+        freeMatrix(two, new_d);
+        freeMatrix(three, new_d);
+    }
+}
+
+void strassen_c(int d, int** matrix1, int** matrix2, int a_RS, int a_CS, int b_RS, int b_CS, int** answer, int cross){
+    if(d<=cross){
+        s_standard_mult(d, matrix1, matrix2, a_RS, a_CS, b_RS, b_CS, answer);
+    }
+    else{
+        int new_d = d/2;
+        
+        int** one = allocateMatrix(new_d);
+        int** two = allocateMatrix(new_d);
+        int** three = allocateMatrix(new_d);
+        
+        /*************/
+        
+        /* Calculate P_4 */
+        // G - E
+        s_matrix_subtract(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS, b_CS, one, 0, 0);
+        
+        // P_4
+        strassen_c(new_d, matrix1, one, a_RS+new_d, a_CS+new_d, 0, 0, two, cross);
+        
+        /* AE + BG ... top left */
+        initialize_values(new_d, two, 0, 0, answer, 0, 0);
+        
+        /* CE + DG ... bottom left */
+        initialize_values(new_d, two, 0, 0, answer, 0+new_d, 0);
+        
+        /*************/
+        
+        /* Calculate P_2 */
+        // A + B
+        s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS, a_CS+new_d, one, 0, 0);
+        
+        // P_2
+        strassen_c(new_d, one, matrix2, 0, 0, b_RS+new_d, b_CS+new_d, two, cross);
+        
+        /* AE + BG ... top left */
+        s_matrix_subtract_to(new_d, two, 0, 0, answer, 0, 0);
+        
+        /* AF + BH ... top right */
+        initialize_values(new_d, two, 0, 0, answer, 0, 0+new_d);
+        
+        /*************/
+        
+        /* Calculate P_5 */
+        // A + D
+        s_matrix_add(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS+new_d, one, 0, 0);
+        
+        // E + H
+        s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS+new_d, b_CS+new_d, two, 0, 0);
+        
+        // P_5
+        strassen_c(new_d, one, two, 0, 0, 0, 0, three, cross);
+        
+        /* AE + BG ... top left */
+        s_matrix_add_to(new_d, three, 0, 0, answer, 0, 0);
+        
+        /* CF + DH ... bottom right */
+        initialize_values(new_d, three, 0, 0, answer, 0+new_d, 0+new_d);
+        
+        /*************/
+        
+        /* Calculate P_6 */
+        // B - D
+        s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS+new_d, a_RS+new_d, a_CS+new_d, one, 0, 0);
+        
+        // G + H
+        s_matrix_add(new_d, matrix2, matrix2, b_RS+new_d, b_CS, b_RS+new_d, b_CS+new_d, two, 0, 0);
+        
+        // P_6
+        strassen_c(new_d, one, two, 0, 0, 0, 0, three, cross);
+        
+        /* AE + BG ... top left */
+        s_matrix_add_to(new_d, three, 0, 0, answer, 0, 0);
+        
+        /*************/
+        
+        /* Calculate P_7 */
+        // A - C
+        s_matrix_subtract(new_d, matrix1, matrix1, a_RS, a_CS, a_RS+new_d, a_CS, one, 0, 0);
+        
+        // E + F
+        s_matrix_add(new_d, matrix2, matrix2, b_RS, b_CS, b_RS, b_CS+new_d, two, 0, 0);
+        
+        // P_7
+        strassen_c(new_d, one, two, 0, 0, 0, 0, three, cross);
+        
+        /* CF + DH ... bottom right */
+        s_matrix_subtract_to(new_d, three, 0, 0, answer, 0+new_d, 0+new_d);
+        
+        /*************/
+        
+        /* Calculate P_3 */
+        // C + D
+        s_matrix_add(new_d, matrix1, matrix1, a_RS+new_d, a_CS, a_RS+new_d, a_CS+new_d, one, 0,0);
+        
+        // P_3
+        strassen_c(new_d, one, matrix2, 0, 0, b_RS, b_CS, two, cross);
+        
+        /* CF + DH ... bottom right */
+        s_matrix_subtract_to(new_d, two, 0, 0, answer, 0+new_d, 0+new_d);
+        
+        /* CE + DG ... bottom left */
+        s_matrix_add_to(new_d, two, 0, 0, answer, 0+new_d, 0);
+        
+        /*************/
+        
+        /* Calculate P_1 */
+        // F - H
+        s_matrix_subtract(new_d, matrix2, matrix2, b_RS, b_CS+new_d, b_RS+new_d, b_CS+new_d, one, 0, 0);
+        
+        // P_1
+        strassen_c(new_d, matrix1, one, a_RS, a_CS, 0, 0, two, cross);
         
         /* AF + BH ... top right */
         s_matrix_add_to(new_d, two, 0, 0, answer, 0, 0+new_d);
@@ -750,5 +881,62 @@ int main(int argc, char *argv[]){
         //printf("Standard algo takes %d seconds %d milliseconds\n", msec/1000, msec%1000);
         //int msec_s = elapsed_s * 1000 / CLOCKS_PER_SEC;
         //printf("Strassen algo takes %d seconds %d milliseconds", msec_s/1000, msec_s%1000)
+    }
+
+    // If flag is 6, for finding experimental crossover
+    if(atoi(argv[1])==6){
+        int d = atoi(argv[2]);
+
+        for (int cross = 8; cross < d; cross *=2)
+    	{
+	        int x = optimalPad(d);
+	        
+	        // Save the filename
+	        const char* filename = argv[3];
+	        
+	        int** a = allocateMatrix_set_zero(x); //first input matrix
+	        int** b = allocateMatrix_set_zero(x); //second input matrix
+	        
+	        int** s_c = allocateMatrix_set_zero(x); //strassen result matrix	        
+	        
+	        FILE* file = fopen(filename, "r");
+	        
+	        //To fill up matrices from text file
+	        int i = 0;
+	        int j = 0;
+	        bool first_matrix = true;
+	        int number;
+	        while(fscanf(file, "%d" , &number) > 0) {
+	            if(first_matrix){
+	                a[i][j]=number;
+	                j++;
+	                if(j==d){
+	                    j=0;
+	                    i++;
+	                    if(i==d){
+	                        first_matrix = false;
+	                        i = 0;
+	                    }
+	                }
+	            }
+	            else{
+	                if(j==d){
+	                    j=0;
+	                    i+=1;
+	                }
+	                if(i==d){
+	                    i=0;
+	                }
+	                b[i][j]=number;
+	                j++;
+	            }
+	        }
+	        fclose(file);
+	        start = clock();
+	        strassen_c(x, a, b, 0, 0, 0, 0, s_c, cross);
+			elapsed = clock() - start;
+
+	        printf("Strassen with crossover of %d takes %d\n", cross, (int)(1000*elapsed/CLOCKS_PER_SEC));
+    	}
     }
 }
