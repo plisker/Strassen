@@ -954,6 +954,10 @@ int main(int argc, char *argv[]){
         int d = atoi(argv[2]);
         int x = optimalPad(d);
         
+        printf("Original dimension: %d\n", d);
+        printf("Optimal padding: %d\n", x);
+
+
         // Save the filename
         const char* filename = argv[3];
         
